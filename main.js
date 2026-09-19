@@ -208,39 +208,61 @@ B30C_P00179.jpg
 
 
 
-function sendListToEmail() {
-  // 1. Gather your selected photos into a readable list
-  // (Change 'selectedPhotos' to whatever variable holds your list)
-  const photoList = selectedPhotos.join('\n- '); 
+async function sendListToEmail() {
+  alert("1. Button connection is working!");
 
-  // 2. Prepare the data payload
+  // Step A: Safely check if the photo list variable exists
+  let photosArray = [];
+  
+  try {
+    // If you use a different variable name, change 'selectedPhotos' below to match it
+    if (typeof selectedPhotos !== 'undefined') {
+      photosArray = selectedPhotos;
+    } else {
+      alert("❌ Error: The variable 'selectedPhotos' does not exist in your code. We need to find out what your photo list is named.");
+      return;
+    }
+  } catch (e) {
+    alert("❌ Error reading variables: " + e.message);
+    return;
+  }
+
+  // Step B: Check if any photos are actually selected
+  if (!photosArray || photosArray.length === 0) {
+    alert("⚠️ The list is empty! Please select some photos first before submitting.");
+    return;
+  }
+
+  alert("2. Found " + photosArray.length + " selected photos. Sending email now...");
+
+  // Step C: Format and send the data
+  const photoList = Array.isArray(photosArray) ? photosArray.join('\n- ') : photosArray; 
+
   const formData = {
-    access_key: "3dda0e4c-6471-46d2-81b4-37a9fc909736", // 👈 Paste your Web3Forms key here
+    access_key: "3dda0e4c-6471-46d2-81b4-37a9fc909736", // 👈 Double check that your key is pasted here
     subject: "📸 New Photo Selection Received!",
-    from_name: "My Photo Select Webpage",
+    from_name: "Photo Selector Webpage",
     message: "A user has selected the following photos:\n\n- " + photoList
   };
 
-  // 3. Send the data silently in the background
-  fetch('https://web3forms.com', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Accept': 'application/json'
-    },
-    body: JSON.stringify(formData)
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      // Let the user know it worked without leaving the page
-      alert("Your selections have been sent successfully!"); 
+  try {
+    const response = await fetch('https://web3forms.com', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(formData)
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      alert("🎉 Success! The list has reached your email inbox."); 
     } else {
-      alert("Oops! There was a problem sending the list.");
+      alert("❌ Web3Forms rejected it: " + result.message); 
     }
-  })
-  .catch(error => {
-    console.error("Error:", error);
-    alert("Network error. Please try again.");
-  });
+  } catch (error) {
+    alert("❌ Network Error: Could not connect to the email server.");
+  }
 }
