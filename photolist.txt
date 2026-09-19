@@ -1,0 +1,38 @@
+
+@echo off
+
+setlocal ENABLEDELAYEDEXPANSION
+
+REM set input and out put folders
+set output_folder=c:\temp\doctest\newdoc
+set input_folder=c:\temp\doctest\olddoc
+set origin_folder=c:\temp\doctest\olddoc
+
+
+set isV=V
+set mTg=B27G
+set mF2=B27G_X
+set mS=3YR
+set "mOrigin=%origin_folder%"
+
+set new_name=1
+set old_name=2
+set origin_name=3
+
+set mF=a
+set mT=title
+set mD=date
+set mC=comments
+
+c:
+cd %input_folder%
+
+    ffmpeg -i "PMWedding_Short.mp4" -c:v libx264 -crf 26 -preset slow -c:a aac -b:a 96k  "%output_folder%\PMWedding_Short_s.mp4" -n
+    ffmpeg -i "PMWedding_Filmed_By_Karen_Beam.mp4" -c:v libx264 -crf 26 -preset slow -c:a aac -b:a 96k  "%output_folder%\PMWedding_Filmed_By_Karen_Beam_s.mp4" -n
+    ffmpeg -i "PMWedding_ALL.mp4" -c:v libx264 -crf 26 -preset slow -c:a aac -b:a 96k  "%output_folder%\PMWedding_ALL_s.mp4" -n
+
+REM 三年班  SNB, GYK 公益课 snbbk 三年班指法补课20260523 2026辟谷线上June06P2 BG
+
+echo on
+pause
+
