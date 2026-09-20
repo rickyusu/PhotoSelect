@@ -339,7 +339,8 @@ function prepareAndMarkDeleted(event) {
   // 🛠️ SMART ENVIRONMENT CHECK:
   // If we are on the live web (http/https), send the email!
   if (window.location.protocol.startsWith('http')) {
-    document.getElementById('photoForm').submit();
+    alert("Internet Test Mode: Selection list saved and images grayed out successfully!");
+    // document.getElementById('photoForm').submit();
   } else {
     // If testing locally (file:///), skip the live submit so the browser doesn't crash
     alert("💻 Local Test Mode: Selection list saved and images grayed out successfully! (Email submission skipped until pushed to GitHub)");
