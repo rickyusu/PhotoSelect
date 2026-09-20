@@ -268,13 +268,15 @@ async function sendListToEmail() {
 }
 
 
-function prepareAndSend(event) {
-  // 1. Scan the webpage for your selected items
+async function prepareAndSend(event) {
+  // 1. Stop the browser from using the old native page redirection
+  if (event) event.preventDefault();
+
+  // 2. Scan the webpage for your selected items
   const selectedElements = document.querySelectorAll('.selected');
   
   if (selectedElements.length === 0) {
     alert("Please select at least one photo before submitting.");
-    event.preventDefault();
     return;
   }
 
@@ -283,48 +285,141 @@ function prepareAndSend(event) {
   selectedElements.forEach((element) => {
     let nameFound = "";
 
-    // Method A: If the selected item is the image itself, get its filename
     if (element.tagName === 'IMG' && element.src) {
       nameFound = element.src.split('/').pop();
     } 
-    // Method B: If the selected item is a wrapper box, find the image inside it
     else if (element.querySelector('img')) {
       const innerImg = element.querySelector('img');
       nameFound = innerImg.src.split('/').pop();
     } 
-    // Fallback: If no image element, grab whatever clean text is there
     else if (element.innerText) {
       nameFound = element.innerText.trim();
     }
 
-    // Add to our list only if we found a valid name
     if (nameFound) {
       photoListArray.push(decodeURIComponent(nameFound));
     }
   });
 
-  // 2. Combine the names using ONLY a line break (no symbols, no dashes)
   const photoListText = photoListArray.join('\n'); 
-  document.getElementById('hiddenPhotoList').value = photoListText;
+
+  // 3. Use standard FormData structure (fixes network/CORS blocks)
+  const formData = new FormData();
+  formData.append("access_key", "YOUR_ACCESS_KEY_HERE"); // 👈 Make sure your actual key is pasted here
+  formData.append("subject", "📸 New Photo Selection Received!");
+  formData.append("from_name", "Photo Selector Webpage");
+  formData.append("message", photoListText);
+
+  // 4. Send the data silently first
+  try {
+    const response = await fetch('https://web3forms.com', {
+      method: 'POST',
+      body: formData // Sending as FormData bypasses strict JSON cross-origin checks
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      // 5. ✨ SUCCESS: Dim the images AFTER the email goes through successfully
+      selectedElements.forEach((element) => {
+        element.classList.remove('selected'); 
+        
+        element.style.setProperty('opacity', '0.2', 'important');
+        element.style.setProperty('filter', 'grayscale(100%)', 'important');
+        element.style.setProperty('pointer-events', 'none', 'important'); 
+
+        const internalImg = element.tagName === 'IMG' ? element : element.querySelector('img');
+        if (internalImg) {
+          internalImg.style.setProperty('opacity', '0.2', 'important');
+          internalImg.style.setProperty('filter', 'grayscale(100%)', 'important');
+        }
+      });
+
+      // Show the success message on your screen
+      alert("🎉 Email sent successfully! Your selections are now marked as sent."); 
+    } else {
+      alert("❌ Web3Forms error: " + result.message);
+    }
+  } catch (error) {
+    console.error("Network log error:", error);
+    alert("❌ Network Error: The browser blocked the background connection. Check your access key or try turning off privacy extensions/adblockers.");
+  }
+}
+
+function prepareAndMarkDeleted() {
+  const selectedElements = document.querySelectorAll('.selected');
   
-  alert("Sending your " + photoListArray.length + " photo selections now...");
+  if (selectedElements.length === 0) {
+    alert("Please select at least one photo before submitting.");
+    return;
+  }
 
+  let photoListArray = [];
+  let deletedPhotosList = JSON.parse(localStorage.getItem('deletedPhotos')) || [];
 
-  // 3. 🛠️ FORCE DIMMING: Direct inline styles to override any other settings
   selectedElements.forEach((element) => {
-    element.classList.remove('selected'); // Remove selection color
-    
-    // Apply styles directly to the clicked container
-    element.style.opacity = "0.2";
-    element.style.filter = "grayscale(100%)";
-    element.style.pointerEvents = "none"; 
+    let nameFound = "";
 
-    // Also look inside for an image element and force-dim it too
-    const internalImg = element.tagName === 'IMG' ? element : element.querySelector('img');
-    if (internalImg) {
-      internalImg.style.opacity = "0.2";
-      internalImg.style.filter = "grayscale(100%)";
+    if (element.tagName === 'IMG' && element.src) {
+      nameFound = element.src.split('/').pop();
+    } 
+    else if (element.querySelector('img')) {
+      const innerImg = element.querySelector('img');
+      nameFound = innerImg.src.split('/').pop();
+    } 
+    else if (element.innerText) {
+      nameFound = element.innerText.trim();
+    }
+
+    if (nameFound) {
+      const cleanName = decodeURIComponent(nameFound);
+      photoListArray.push(cleanName);
+      deletedPhotosList.push(cleanName); 
     }
   });
 
+  // 1. Package clean filenames for the email delivery
+  document.getElementById('hiddenPhotoList').value = photoListArray.join('\n'); 
+  
+  // 2. Queue selections into temporary browser memory 
+  localStorage.setItem('pendingDeletions', JSON.stringify(photoListArray));
 }
+
+// Automatically processes dimming and fires alerts when page reloads/returns
+function checkUrlAndApplyDimming() {
+  const urlParams = new URLSearchParams(window.location.search);
+  let savedDeletions = JSON.parse(localStorage.getItem('deletedPhotos')) || [];
+  
+  // If we just got redirected back from a successful form submission
+  if (urlParams.get('status') === 'success') {
+    const pending = JSON.parse(localStorage.getItem('pendingDeletions')) || [];
+    if (pending.length > 0) {
+      savedDeletions = [...new Set([...savedDeletions, ...pending])];
+      localStorage.setItem('deletedPhotos', JSON.stringify(savedDeletions));
+      localStorage.removeItem('pendingDeletions');
+      
+      // Clean up the URL bar text beautifully
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      alert("🎉 Email sent successfully! Your selections are now marked as deleted.");
+    }
+  }
+
+  // Force-apply gray and dim visual rules to any matched element
+  const allItems = document.querySelectorAll('img, .photo-box'); // Add your custom class if needed
+  allItems.forEach(element => {
+    let name = "";
+    if (element.tagName === 'IMG' && element.src) name = element.src.split('/').pop();
+    else if (element.querySelector('img')) name = element.querySelector('img').src.split('/').pop();
+
+    if (savedDeletions.includes(decodeURIComponent(name))) {
+      element.classList.remove('selected');
+      element.style.setProperty('opacity', '0.2', 'important');
+      element.style.setProperty('filter', 'grayscale(100%)', 'important');
+      element.style.setProperty('pointer-events', 'none', 'important');
+    }
+  });
+}
+
+// Trigger state layout check on execution
+window.addEventListener('DOMContentLoaded', checkUrlAndApplyDimming);
