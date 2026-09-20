@@ -358,6 +358,7 @@ function prepareAndMarkDeleted() {
   }
 
   let photoListArray = [];
+  // Grab any previously deleted photos from memory so we don't overwrite them
   let deletedPhotosList = JSON.parse(localStorage.getItem('deletedPhotos')) || [];
 
   selectedElements.forEach((element) => {
@@ -377,44 +378,34 @@ function prepareAndMarkDeleted() {
     if (nameFound) {
       const cleanName = decodeURIComponent(nameFound);
       photoListArray.push(cleanName);
-      deletedPhotosList.push(cleanName); 
+      
+      // Add the photo to our permanent deletion tracking list if it isn't already there
+      if (!deletedPhotosList.includes(cleanName)) {
+        deletedPhotosList.push(cleanName);
+      }
     }
   });
 
-  // 1. Package clean filenames for the email delivery
+  // 1. Package the file names cleanly (one per line, no dashes) for the email
   document.getElementById('hiddenPhotoList').value = photoListArray.join('\n'); 
   
-  // 2. Queue selections into temporary browser memory 
-  localStorage.setItem('pendingDeletions', JSON.stringify(photoListArray));
+  // 2. Save the updated list to browser storage before leaving the page
+  localStorage.setItem('deletedPhotos', JSON.stringify(deletedPhotosList));
 }
 
-// Automatically processes dimming and fires alerts when page reloads/returns
-function checkUrlAndApplyDimming() {
-  const urlParams = new URLSearchParams(window.location.search);
-  let savedDeletions = JSON.parse(localStorage.getItem('deletedPhotos')) || [];
+// Automatically runs whenever the webpage loads or when you press the 'Back' arrow
+function applyDimmingEffects() {
+  const savedDeletions = JSON.parse(localStorage.getItem('deletedPhotos')) || [];
   
-  // If we just got redirected back from a successful form submission
-  if (urlParams.get('status') === 'success') {
-    const pending = JSON.parse(localStorage.getItem('pendingDeletions')) || [];
-    if (pending.length > 0) {
-      savedDeletions = [...new Set([...savedDeletions, ...pending])];
-      localStorage.setItem('deletedPhotos', JSON.stringify(savedDeletions));
-      localStorage.removeItem('pendingDeletions');
-      
-      // Clean up the URL bar text beautifully
-      window.history.replaceState({}, document.title, window.location.pathname);
-      
-      alert("🎉 Email sent successfully! Your selections are now marked as deleted.");
-    }
-  }
-
-  // Force-apply gray and dim visual rules to any matched element
+  // Scans all photos/containers on your screen
   const allItems = document.querySelectorAll('img, .photo-box'); 
+  
   allItems.forEach(element => {
     let name = "";
     if (element.tagName === 'IMG' && element.src) name = element.src.split('/').pop();
     else if (element.querySelector('img')) name = element.querySelector('img').src.split('/').pop();
 
+    // If this photo filename is found in our deleted list history, dim it completely
     if (savedDeletions.includes(decodeURIComponent(name))) {
       element.classList.remove('selected');
       element.style.setProperty('opacity', '0.2', 'important');
@@ -424,5 +415,7 @@ function checkUrlAndApplyDimming() {
   });
 }
 
-// Trigger state layout check on execution
-window.addEventListener('DOMContentLoaded', checkUrlAndApplyDimming);
+// Fire the scan automatically when the page loads up
+window.addEventListener('DOMContentLoaded', applyDimmingEffects);
+
+

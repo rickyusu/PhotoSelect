@@ -18,22 +18,37 @@
        <!--
         <button class="btn" onclick="generateList()">Done! Get My List</button>
         <button class="btn"  onclick="sendListToEmail()"> Submit Selection</button>
-        -->
+    
 
 <form action="https://web3forms.com" method="POST" id="photoForm" onsubmit="prepareAndMarkDeleted()">
-  <!-- 1. Paste your exact Web3Forms Access Key below -->
+    1. Paste your exact Web3Forms Access Key below 
   <input type="hidden" name="access_key" value="3dda0e4c-6471-46d2-81b4-37a9fc909736">
   <input type="hidden" name="subject" value="📸 New Photo Selection Received!">  
-  <!-- ⚠️ REPLACE THIS VALUE WITH YOUR LIVE GITHUB WEBSITE LINK -->
+   ⚠️ REPLACE THIS VALUE WITH YOUR LIVE GITHUB WEBSITE LINK 
   <input type="hidden" name="redirect" value="https://rickyusu.github.io/PhotoSelect/?status=success">
 
   <input type="hidden" name="name" value= "Jeta Link">
   <input type="hidden" name="email" value= "jetalinkinc@gmail.com">
-  <!-- 2. This hidden text box will hold your photo list -->
+   2. This hidden text box will hold your photo list 
   <textarea name="message" id="hiddenPhotoList" style="display:none;"></textarea>
 
-  <!-- 3. Clicking this will compile the list and send the email automatically -->
+   3. Clicking this will compile the list and send the email automatically 
   <button class="btn" type="submit" onclick="prepareAndSend(event)">Submit Selection</button>
+</form>
+    -->
+
+<form action="https://api.web3forms.com/submit" method="POST" id="photoForm" onsubmit="prepareAndMarkDeleted()">
+  <!-- Paste your exact Web3Forms Access Key below -->
+  <input type="hidden" name="access_key" value="3dda0e4c-6471-46d2-81b4-37a9fc909736">
+  <input type="hidden" name="subject" value="📸 New Photo Selection Received!">
+  
+  <input type="hidden" name="name" value= "Jeta Link">
+  <input type="hidden" name="email" value= "jetalinkinc@gmail.com">
+
+  <!-- Hidden text box to hold the clean file list -->
+  <textarea name="message" id="hiddenPhotoList" style="display:none;"></textarea>
+
+  <button class="btn"  type="submit">Submit Selection</button>
 </form>
 
     </div>
