@@ -349,7 +349,11 @@ async function prepareAndSend(event) {
   }
 }
 
-function prepareAndMarkDeleted() {
+// -----------------
+function prepareAndMarkDeleted(event) {
+  // 1. Stop the browser from instantly reloading or leaving the page
+  if (event) event.preventDefault();
+
   const selectedElements = document.querySelectorAll('.selected');
   
   if (selectedElements.length === 0) {
@@ -375,7 +379,6 @@ function prepareAndMarkDeleted() {
     }
 
     if (nameFound) {
-      // 🛠️ FIX 1: Convert filename to lowercase before saving to memory
       const cleanName = decodeURIComponent(nameFound).toLowerCase();
       photoListArray.push(cleanName);
       
@@ -385,10 +388,22 @@ function prepareAndMarkDeleted() {
     }
   });
 
+  // 2. Package clean filenames for the email delivery
   document.getElementById('hiddenPhotoList').value = photoListArray.join('\n'); 
+  
+  // 3. Save to browser storage completely *before* submitting
   localStorage.setItem('deletedPhotos', JSON.stringify(deletedPhotosList));
+
+  // 4. Run your dimming function right now so they gray out instantly on screen
+  applyDimmingEffects();
+
+  // 5. Wait just 100 milliseconds for the data to settle, then submit the form automatically
+  setTimeout(() => {
+    document.getElementById('photoForm').submit();
+  }, 100);
 }
 
+// ---------------------
 function applyDimmingEffects() {
   const savedDeletions = JSON.parse(localStorage.getItem('deletedPhotos')) || [];
   
