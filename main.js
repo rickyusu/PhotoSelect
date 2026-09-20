@@ -351,7 +351,8 @@ function prepareAndMarkDeleted() {
     alert("Internet Test Mode: Selection list saved and images grayed out successfully!");
     // Wait slightly for the SMS app redirection handoff before completing the email form submit
     setTimeout(() => {
-      document.getElementById('realSubmitBtn').click();
+      // Delay sending email
+      // document.getElementById('realSubmitBtn').click();
     }, 800);
   } else {
     // If testing locally (file:///), skip the live submit so the browser doesn't crash
