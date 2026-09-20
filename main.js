@@ -346,6 +346,7 @@ async function prepareAndSend(event) {
   }
 }
 
+
 function prepareAndMarkDeleted() {
   const selectedElements = document.querySelectorAll('.selected');
   
@@ -381,12 +382,19 @@ function prepareAndMarkDeleted() {
   // 1. Package clean filenames for the email delivery
   document.getElementById('hiddenPhotoList').value = photoListArray.join('\n'); 
   
-  // 2. ✨ OPTION 1 INTEGRATION: Smart Local vs. Web Redirection Fix
-  // This automatically rewrites the redirect URL to match exactly where you are viewing the file
+  // 2. 🛠️ FIXED: Safe Redirection Assignment
   const redirectInput = document.querySelector('input[name="redirect"]');
   if (redirectInput) {
+    // Take ONLY the clean base URL before any existing '?' marks
     const currentUrlBase = window.location.href.split('?')[0];
-    redirectInput.value = currentUrlBase + "?status=success";
+    
+    // ONLY use the custom redirect if we are on the live website (http/https)
+    if (currentUrlBase.startsWith('http')) {
+      redirectInput.value = currentUrlBase + "?status=success";
+    } else {
+      // If testing locally (file:///), remove the redirect rule so Web3Forms doesn't crash
+      redirectInput.removeAttribute('name'); 
+    }
   }
   
   // 3. Queue selections into temporary browser memory 
@@ -414,7 +422,7 @@ function checkUrlAndApplyDimming() {
   }
 
   // Force-apply gray and dim visual rules to any matched element
-  const allItems = document.querySelectorAll('img, .photo-box'); // Add your custom class if needed
+  const allItems = document.querySelectorAll('img, .photo-box'); 
   allItems.forEach(element => {
     let name = "";
     if (element.tagName === 'IMG' && element.src) name = element.src.split('/').pop();
