@@ -1,38 +1,119 @@
 
-@echo off
 
-setlocal ENABLEDELAYEDEXPANSION
+function prepareAndMarkDeleted() {
+  // 1. ✨ FIX: Grab the event automatically from the browser window 
+  // (This stops the network error bug on GitHub without changing your HTML)
+  const currentEvent = window.event;
 
-REM set input and out put folders
-set output_folder=c:\temp\doctest\newdoc
-set input_folder=c:\temp\doctest\olddoc
-set origin_folder=c:\temp\doctest\olddoc
+  const selectedElements = document.querySelectorAll('.selected');
+  
+  if (selectedElements.length === 0) {
+    alert("Please select at least one photo before submitting.");
+    if (currentEvent) currentEvent.preventDefault();
+    return;
+  }
+
+  let photoListArray = [];
+  let deletedPhotosList = JSON.parse(localStorage.getItem('deletedPhotos')) || [];
+
+  selectedElements.forEach((element) => {
+    let nameFound = "";
+
+    if (element.tagName === 'IMG' && element.src) {
+      nameFound = element.src.split('/').pop();
+    } 
+    else if (element.querySelector('img')) {
+      const innerImg = element.querySelector('img');
+      nameFound = innerImg.src.split('/').pop();
+    } 
+    else if (element.innerText) {
+      nameFound = element.innerText.trim();
+    }
+
+    if (nameFound) {
+      const cleanName = decodeURIComponent(nameFound);
+      photoListArray.push(cleanName); 
+      
+      // Keep filenames lowercase in internal memory to guarantee a match on GitHub
+      if (!deletedPhotosList.includes(cleanName.toLowerCase())) {
+        deletedPhotosList.push(cleanName.toLowerCase());
+      }
+    }
+  });
+
+  const photoListText = photoListArray.join('\n'); 
+
+  // 📸 SHOW THE DISPLAY BOX ALERT WITH THE LIST
+  alert("You have selected the following photos:\n\n" + photoListText + "\n\nSending your email now...");
+
+  // 2. Pack clean filenames separated strictly by a line break into the form
+  document.getElementById('hiddenPhotoList').value = photoListText; 
+  
+  // 3. Commit updates to browser local storage memory immediately
+  localStorage.setItem('deletedPhotos', JSON.stringify(deletedPhotosList));
+
+  // 4. Force visual grayscale dimming on screen instantly right as click processing completes
+  selectedElements.forEach((element) => {
+    element.classList.remove('selected');
+    
+    element.style.setProperty('opacity', '0.2', 'important');
+    element.style.setProperty('filter', 'grayscale(100%)', 'important');
+    element.style.setProperty('pointer-events', 'none', 'important');
+
+    const internalImg = element.tagName === 'IMG' ? element : element.querySelector('img');
+    if (internalImg) {
+      internalImg.style.setProperty('opacity', '0.2', 'important');
+      internalImg.style.setProperty('filter', 'grayscale(100%)', 'important');
+    }
+  });
+}
+
+==================
 
 
-set isV=V
-set mTg=B27G
-set mF2=B27G_X
-set mS=3YR
-set "mOrigin=%origin_folder%"
+OLD:
 
-set new_name=1
-set old_name=2
-set origin_name=3
+function prepareAndMarkDeleted() {
+  const selectedElements = document.querySelectorAll('.selected');
+  
+  if (selectedElements.length === 0) {
+    alert("Please select at least one photo before submitting.");
+    return;
+  }
 
-set mF=a
-set mT=title
-set mD=date
-set mC=comments
+  let photoListArray = [];
+  // Grab any previously deleted photos from memory so we don't overwrite them
+  let deletedPhotosList = JSON.parse(localStorage.getItem('deletedPhotos')) || [];
 
-c:
-cd %input_folder%
+  selectedElements.forEach((element) => {
+    let nameFound = "";
 
-    ffmpeg -i "PMWedding_Short.mp4" -c:v libx264 -crf 26 -preset slow -c:a aac -b:a 96k  "%output_folder%\PMWedding_Short_s.mp4" -n
-    ffmpeg -i "PMWedding_Filmed_By_Karen_Beam.mp4" -c:v libx264 -crf 26 -preset slow -c:a aac -b:a 96k  "%output_folder%\PMWedding_Filmed_By_Karen_Beam_s.mp4" -n
-    ffmpeg -i "PMWedding_ALL.mp4" -c:v libx264 -crf 26 -preset slow -c:a aac -b:a 96k  "%output_folder%\PMWedding_ALL_s.mp4" -n
+    if (element.tagName === 'IMG' && element.src) {
+      nameFound = element.src.split('/').pop();
+    } 
+    else if (element.querySelector('img')) {
+      const innerImg = element.querySelector('img');
+      nameFound = innerImg.src.split('/').pop();
+    } 
+    else if (element.innerText) {
+      nameFound = element.innerText.trim();
+    }
 
-REM 三年班  SNB, GYK 公益课 snbbk 三年班指法补课20260523 2026辟谷线上June06P2 BG
+    if (nameFound) {
+      const cleanName = decodeURIComponent(nameFound);
+      photoListArray.push(cleanName);
+      
+      // Add the photo to our permanent deletion tracking list if it isn't already there
+      if (!deletedPhotosList.includes(cleanName)) {
+        deletedPhotosList.push(cleanName);
+      }
+    }
+  });
 
-echo on
-pause
+  // 1. Package the file names cleanly (one per line, no dashes) for the email
+  document.getElementById('hiddenPhotoList').value = photoListArray.join('\n'); 
+  
+  // 2. Save the updated list to browser storage before leaving the page
+  localStorage.setItem('deletedPhotos', JSON.stringify(deletedPhotosList));
+}
 

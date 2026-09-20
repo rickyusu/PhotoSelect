@@ -270,6 +270,7 @@ async function sendListToEmail() {
 // -----------------
 
 function prepareAndMarkDeleted() {
+
   const selectedElements = document.querySelectorAll('.selected');
   
   if (selectedElements.length === 0) {
@@ -305,6 +306,11 @@ function prepareAndMarkDeleted() {
       }
     }
   });
+
+   const photoListText = photoListArray.join('\n'); 
+
+  // 📸 SHOW THE DISPLAY BOX ALERT WITH THE LIST
+  alert("You have selected the following photos:\n\n" + photoListText + "\n\nSending your email now...");
 
   // 1. Package the file names cleanly (one per line, no dashes) for the email
   document.getElementById('hiddenPhotoList').value = photoListArray.join('\n'); 
