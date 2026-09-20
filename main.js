@@ -381,7 +381,15 @@ function prepareAndMarkDeleted() {
   // 1. Package clean filenames for the email delivery
   document.getElementById('hiddenPhotoList').value = photoListArray.join('\n'); 
   
-  // 2. Queue selections into temporary browser memory 
+  // 2. ✨ OPTION 1 INTEGRATION: Smart Local vs. Web Redirection Fix
+  // This automatically rewrites the redirect URL to match exactly where you are viewing the file
+  const redirectInput = document.querySelector('input[name="redirect"]');
+  if (redirectInput) {
+    const currentUrlBase = window.location.href.split('?')[0];
+    redirectInput.value = currentUrlBase + "?status=success";
+  }
+  
+  // 3. Queue selections into temporary browser memory 
   localStorage.setItem('pendingDeletions', JSON.stringify(photoListArray));
 }
 
@@ -423,3 +431,4 @@ function checkUrlAndApplyDimming() {
 
 // Trigger state layout check on execution
 window.addEventListener('DOMContentLoaded', checkUrlAndApplyDimming);
+
