@@ -1,8 +1,10 @@
     // --- EASY PASTE CONFIGURATION ---
     // Just paste your raw list of file names or URLs inside the backticks below.
     // One name per line. No quotes or commas needed!
-    const rawPhotoList = `
-    B30C_P00002.jpg
+
+// This works perfectly no matter the size of rawPhotoList
+const rawPhotoListText  = `
+B30C_P00002.jpg
 B30C_P00006.jpg
 B30C_P00007.jpg
 B30C_P00010.jpg
@@ -134,44 +136,57 @@ B30C_P00178.jpg
 B30C_P00179.jpg
 
     `;
-    // --------------------------------
 
-    // Base URL path to your pCloud folder (e.g., your pCloud Public folder link)
-    // Example: "https://pcloud.link..."
-    const pCloudFolderBaseUrl = "https://filedn.com/lTh0v2Bogc301OgoFen42cL/ToDelete/"; 
 
+
+// 1. Function to extract the 100 photos for the current pageconst pCloudFolderBaseUrl = "https://filedn.com/lTh0v2Bogc301OgoFen42cL/ToDelete/"; 
+
+
+// 1. KEEP YOUR ORIGINAL SETUPS
+const pCloudFolderBaseUrl = "https://filedn.com/lTh0v2Bogc301OgoFen42cL/ToDelete/"; 
+const selectedPhotos = new Set(); // Keeps track of selections across pages
+
+// 2. TURN YOUR TEXT LIST INTO THE WORKING ARRAY
+const rawPhotoList = rawPhotoListText
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => line.length > 0);
+
+// 3. ADD THE NEW PAGINATION STATE Variables
+let currentPage = 1;
+const photosPerPage = 50;
+const totalPages = Math.ceil(rawPhotoList.length / photosPerPage);
+
+// 4. COMBINE WRAPPED INSIDE THE NEW FUNCTION
+function displayPhotos() {
     const grid = document.getElementById('photoGrid');
-    const selectedPhotos = new Set();
+    grid.innerHTML = ''; // Clear out the old 100 photos before loading new ones
 
-    // Clean up the text list and turn it into a working array
-    const photoLines = rawPhotoList.split('\n')
-        .map(line => line.trim())
-        .filter(line => line.length > 0);
+    // Calculate the 100 items for this specific page
+    const startIndex = (currentPage - 1) * photosPerPage;
+    const endIndex = startIndex + photosPerPage;
+    const currentPhotos = rawPhotoList.slice(startIndex, endIndex);
 
-    photoLines.forEach((fileName, index) => {
+    // Run YOUR ORIGINAL loop logic, but only on the 100 'currentPhotos'  
+    currentPhotos.forEach((fileName) => {
         const card = document.createElement('div');
         card.className = 'photo-card';
         card.dataset.name = fileName;
 
-        const img = document.createElement('img');
-        
-        // If your list contains full links, use them directly. Otherwise, combine with base URL.
-        if (fileName.startsWith('http://') || fileName.startsWith('https://')) {
-            img.src = fileName;
-        } else {
-            // Adjust this joining logic depending on how your pCloud links look
-            img.src = pCloudFolderBaseUrl + fileName; 
+        if (selectedPhotos.has(fileName)) {
+            card.classList.add('selected'); 
         }
-        
-        img.loading = "lazy";
 
+        // 1. Your original image creation
+        const img = document.createElement('img');
+        img.src = pCloudFolderBaseUrl + fileName;
+
+        // 2. ADD THESE LINES: Create a text element for the filename
         const label = document.createElement('div');
-        label.className = 'photo-label';
-        label.innerText = fileName;
+        label.className = 'photo-label'; // You can style this in CSS later
+        label.innerText = fileName;       // This puts the file name text inside it
 
-        card.appendChild(img);
-        card.appendChild(label);
-
+        // Your click listeners stay the same...
         card.addEventListener('click', () => {
             if (selectedPhotos.has(fileName)) {
                 selectedPhotos.delete(fileName);
@@ -182,90 +197,31 @@ B30C_P00179.jpg
             }
         });
 
+        // 3. Append BOTH the image and the label to the card
+        card.appendChild(img);
+        card.appendChild(label); // Adds the text right under or over the photo
+        
         grid.appendChild(card);
     });
 
-    function generateList() {
-        if (selectedPhotos.size === 0) {
-            alert("Please select at least one photo to delete!");
-            return;
-        }
-        const sortedArray = Array.from(selectedPhotos).sort();
-        const textarea = document.getElementById('listText');
-        textarea.value = `Please delete these photos:\n\n${sortedArray.join('\n')}`;
-        document.getElementById('resultModal').style.display = 'flex';
-    }
-
-    // (Keep the same copyAndClose function from before)
-    function copyAndClose() {
-        const textarea = document.getElementById('listText');
-        textarea.select();
-        textarea.setSelectionRange(0, 99999);
-        navigator.clipboard.writeText(textarea.value);
-        alert("List copied to clipboard!");
-        document.getElementById('resultModal').style.display = 'none';
-    }
-
-
-
-async function sendListToEmail() {
-  alert("1. Button connection is working!");
-
-  // Step A: Safely check if the photo list variable exists
-  let photosArray = [];
-  
-  try {
-    // If you use a different variable name, change 'selectedPhotos' below to match it
-    if (typeof selectedPhotos !== 'undefined') {
-      photosArray = selectedPhotos;
-    } else {
-      alert("❌ Error: The variable 'selectedPhotos' does not exist in your code. We need to find out what your photo list is named.");
-      return;
-    }
-  } catch (e) {
-    alert("❌ Error reading variables: " + e.message);
-    return;
-  }
-
-  // Step B: Check if any photos are actually selected
-  if (!photosArray || photosArray.length === 0) {
-    alert("⚠️ The list is empty! Please select some photos first before submitting.");
-    return;
-  }
-
-  alert("2. Found " + photosArray.length + " selected photos. Sending email now...");
-
-  // Step C: Format and send the data
-  const photoList = Array.isArray(photosArray) ? photosArray.join('\n- ') : photosArray; 
-
-  const formData = {
-    access_key: "3dda0e4c-6471-46d2-81b4-37a9fc909736", // 👈 Double check that your key is pasted here
-    subject: "📸 New Photo Selection Received!",
-    from_name: "Photo Selector Webpage",
-    message: "A user has selected the following photos:\n\n- " + photoList
-  };
-
-  try {
-    const response = await fetch('https://web3forms.com', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(formData)
-    });
-
-    const result = await response.json();
-
-    if (result.success) {
-      alert("🎉 Success! The list has reached your email inbox."); 
-    } else {
-      alert("❌ Web3Forms rejected it: " + result.message); 
-    }
-  } catch (error) {
-    alert("❌ Network Error: Could not connect to the email server.");
-  }
+    // Update your page buttons text & disabled states
+    document.getElementById('pageIndicator').innerText = `Page ${currentPage} of ${totalPages}`;
+    document.getElementById('prevBtn').disabled = (currentPage === 1);
+    document.getElementById('nextBtn').disabled = (currentPage === totalPages);
 }
+
+
+// 4. Function called when Next or Prev buttons are clicked
+function changePage(direction) {
+  currentPage += direction;
+  displayPhotos(); // Re-render the grid with the new 100 photos
+  window.scrollTo(0, 0); // Optional: Scroll back to top of the page
+}
+
+// Initial load on page opening// Replace your old "displayPhotos();" line at the bottom with this:
+window.onload = function() {
+  displayPhotos();
+};
 
 // -----------------
 
@@ -322,7 +278,7 @@ function prepareAndMarkDeleted() {
     alert("You have selected the following photos:\n\n" + photoListText + "\n\nList copied to clipboard! Opening text message...");
 
     // Replace +1234567890 with your actual phone number (include country code)
-    const myPhoneNumber = "+1234567890"; 
+    const myPhoneNumber = "+19496482361"; 
     const smsBody = encodeURIComponent("Here are my selected photos:\n" + photoListText);
     
     // Open native messaging app
@@ -381,3 +337,25 @@ function resetPageMemory() {
 }
 
 window.addEventListener('DOMContentLoaded', applyDimmingEffects);
+
+
+function submitSelectedPhotos() {
+    // 1. Convert the Set into a clean array of strings
+    const allSelectedFiles = Array.from(selectedPhotos);
+
+    // 2. Safety check: Check if they selected anything at all
+    if (allSelectedFiles.length === 0) {
+        alert("Please select at least one photo before submitting.");
+        return;
+    }
+
+    // 3. Process the entire list (Example: Log it or pass it to your backend)
+    console.log("Submitting all selected files across all pages:", allSelectedFiles);
+
+    // ---- YOUR ACTUAL SUBMISSION LOGIC HERE ----
+    // If you are formatting the text to copy/paste, you can do this:
+    const outputText = allSelectedFiles.join('\n');
+    
+    // Example: If you have a text area to show the final list:
+    // document.getElementById('outputTextArea').value = outputText;
+}
