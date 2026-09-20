@@ -308,4 +308,23 @@ function prepareAndSend(event) {
   document.getElementById('hiddenPhotoList').value = photoListText;
   
   alert("Sending your " + photoListArray.length + " photo selections now...");
+
+
+  // 3. 🛠️ FORCE DIMMING: Direct inline styles to override any other settings
+  selectedElements.forEach((element) => {
+    element.classList.remove('selected'); // Remove selection color
+    
+    // Apply styles directly to the clicked container
+    element.style.opacity = "0.2";
+    element.style.filter = "grayscale(100%)";
+    element.style.pointerEvents = "none"; 
+
+    // Also look inside for an image element and force-dim it too
+    const internalImg = element.tagName === 'IMG' ? element : element.querySelector('img');
+    if (internalImg) {
+      internalImg.style.opacity = "0.2";
+      internalImg.style.filter = "grayscale(100%)";
+    }
+  });
+
 }
