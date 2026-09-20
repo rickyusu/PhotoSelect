@@ -419,3 +419,14 @@ function applyDimmingEffects() {
 window.addEventListener('DOMContentLoaded', applyDimmingEffects);
 
 
+function resetPageMemory() {
+  // Confirm with the user first so they don't click it by accident
+  if (confirm("Are you sure you want to restore all photos and clear the selection history?")) {
+    
+    // 1. Wipe out the permanent tracking list from the browser memory
+    localStorage.removeItem('deletedPhotos');
+    
+    // 2. Reload the page instantly to bring all images back to full color
+    window.location.reload();
+  }
+}
