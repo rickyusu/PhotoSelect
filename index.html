@@ -37,7 +37,6 @@
 </form>
     --><!-- Add 'event' inside the prepareAndMarkDeleted parentheses -->
 
-// <form action="https://web3forms.com" method="POST" id="photoForm" onsubmit="prepareAndMarkDeleted(event)">
 <form action="https://api.web3forms.com/submit" method="POST" id="photoForm">
   <input type="hidden" name="access_key" value="3dda0e4c-6471-46d2-81b4-37a9fc909736">
   <input type="hidden" name="subject" value="📸 New Photo Selection Received!">
@@ -46,7 +45,7 @@
   <input type="hidden" name="email" value="jetalinkinc@gmail.com">
 
   <textarea name="message" id="hiddenPhotoList" style="display:none;"></textarea>
-  
+
    <!-- 1. CHANGE type="submit" TO type="button" AND ADD onclick -->
   <button class="btn" type="button" onclick="prepareAndMarkDeleted()">Submit Selection</button>
   
