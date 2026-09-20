@@ -350,8 +350,9 @@ async function prepareAndSend(event) {
 }
 
 // -----------------
-function prepareAndMarkDeleted(event) {
-  // 1. Stop the browser from instantly reloading or leaving the page
+
+async function prepareAndMarkDeleted(event) {
+  // 1. Completely stop the browser from reloading the page
   if (event) event.preventDefault();
 
   const selectedElements = document.querySelectorAll('.selected');
@@ -388,26 +389,44 @@ function prepareAndMarkDeleted(event) {
     }
   });
 
-  // 2. Package clean filenames for the email delivery
-  document.getElementById('hiddenPhotoList').value = photoListArray.join('\n'); 
-  
-  // 3. Save to browser storage completely *before* submitting
-  localStorage.setItem('deletedPhotos', JSON.stringify(deletedPhotosList));
+  const photoListText = photoListArray.join('\n'); 
 
-  // 4. Run your dimming function right now so they gray out instantly on screen
-  applyDimmingEffects();
+  // 2. Package the data using FormData (bypasses browser security locks)
+  const formData = new FormData();
+  // Change the value below to your actual Web3Forms Access Key
+  formData.append("access_key", "3dda0e4c-6471-46d2-81b4-37a9fc909736"); 
+  formData.append("subject", "📸 New Photo Selection Received!");
+  formData.append("from_name", "Photo Selector Webpage");
+  formData.append("message", photoListText);
 
-  // 5. Wait just 100 milliseconds for the data to settle, then submit the form automatically
-  setTimeout(() => {
-    document.getElementById('photoForm').submit();
-  }, 100);
+  // 3. Send the data silently in the background
+  try {
+    const response = await fetch('https://web3forms.com', {
+      method: 'POST',
+      body: formData 
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+      // 4. Save to browser storage memory
+      localStorage.setItem('deletedPhotos', JSON.stringify(deletedPhotosList));
+
+      // 5. Instantly dim the elements on the screen without any page reloads
+      applyDimmingEffects();
+
+      alert("🎉 Email sent successfully! Your selections are now marked as sent."); 
+    } else {
+      alert("❌ Web3Forms error: " + result.message);
+    }
+  } catch (error) {
+    console.error("Network Error:", error);
+    alert("❌ Network Error: Make sure your Access Key is correct and you have an active internet connection.");
+  }
 }
 
-// ---------------------
 function applyDimmingEffects() {
   const savedDeletions = JSON.parse(localStorage.getItem('deletedPhotos')) || [];
-  
-  // Make sure we scan all image variables or photo container boxes
   const allItems = document.querySelectorAll('img, .photo-box'); 
   
   allItems.forEach(element => {
@@ -415,7 +434,6 @@ function applyDimmingEffects() {
     if (element.tagName === 'IMG' && element.src) name = element.src.split('/').pop();
     else if (element.querySelector('img')) name = element.querySelector('img').src.split('/').pop();
 
-    // 🛠️ FIX 2: Convert live element filenames to lowercase to guarantee a match
     const lowercaseName = decodeURIComponent(name).toLowerCase();
 
     if (savedDeletions.includes(lowercaseName)) {
@@ -429,8 +447,7 @@ function applyDimmingEffects() {
 
 window.addEventListener('DOMContentLoaded', applyDimmingEffects);
 
-// Fire the scan automatically when the page loads up
-window.addEventListener('DOMContentLoaded', applyDimmingEffects);
+//==============
 
 
 function resetPageMemory() {
