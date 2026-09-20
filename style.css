@@ -20,6 +20,7 @@
     border: 1px solid #ddd;
     padding: 10px;
     background: #fff;
+    transition: all 0.3s ease; /* Makes the gray-out transition look smooth */
 }
 
 .photo-label {
@@ -43,6 +44,14 @@
 .photo-card.selected::before {
     opacity: 1;
     transform: scale(1);
+}
+
+/* Style applied when the item is marked as deleted */
+.photo-card.deleted {
+    opacity: 0.4;                /* Makes the card semi-transparent */
+    filter: grayscale(100%);     /* Removes all color from the card images/text */
+    pointer-events: none;        /* Optional: Stops users from clicking it again until un-deleted */
+    border: 1px dashed #ccc;     /* Optional: Gives it a subtle dashed border */
 }
 
         .footer-bar {

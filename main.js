@@ -1130,6 +1130,7 @@ B30F_P01113.jpg
 // 1. KEEP YOUR ORIGINAL SETUPS
 const pCloudFolderBaseUrl = "https://filedn.com/lTh0v2Bogc301OgoFen42cL/ToDelete/"; 
 const selectedPhotos = new Set(); // Keeps track of selections across pages
+const deletedPhotos = new Set(); // Tracks items explicitly deleted/removed
 
 // 2. TURN YOUR TEXT LIST INTO THE WORKING ARRAY
 const rawPhotoList = rawPhotoListText
@@ -1201,6 +1202,8 @@ function changePage(direction) {
   currentPage += direction;
   displayPhotos(); // Re-render the grid with the new 100 photos
   window.scrollTo(0, 0); // Optional: Scroll back to top of the page
+
+  updatePageVisuals();
 }
 
 // Initial load on page opening// Replace your old "displayPhotos();" line at the bottom with this:
@@ -1209,8 +1212,12 @@ window.onload = function() {
 };
 
 // -----------------
+// I want to send all selected as "Deleted"
 
 function prepareAndMarkDeleted() {
+  // new
+
+  // new
   const selectedElements = document.querySelectorAll('.selected');
   
   if (selectedElements.length === 0) {
@@ -1316,8 +1323,9 @@ const waitTime = isMobile ? 800 : 50;
 
 function resetPageMemory() {
   if (confirm("Are you sure you want to restore all photos and clear your selection history?")) {
-    localStorage.removeItem('deletedPhotos');
-    window.location.reload();
+    submitSelectedPhotos();
+    // localStorage.removeItem('deletedPhotos');
+    // window.location.reload();
   }
 }
 
@@ -1341,6 +1349,35 @@ function submitSelectedPhotos() {
     // If you are formatting the text to copy/paste, you can do this:
     const outputText = allSelectedFiles.join('\n');
     
+    // text out
+    alert("NEW: Selected photos:\n\n" + outputText + "\n\nList copied to clipboard! Opening text message...");
     // Example: If you have a text area to show the final list:
     // document.getElementById('outputTextArea').value = outputText;
 }
+
+
+// Run this immediately after the new page cards are added to the DOM
+function updatePageVisuals() {
+    // 1. Find all photo cards currently visible on the screen
+    const visibleCards = document.querySelectorAll('photo-card'); // Use your actual class name here
+        
+    visibleCards.forEach(card => {
+        const fileName = card.dataset.filename; 
+
+        // 1. Check selection state
+        if (selectedPhotos.has(fileName)) {
+            card.classList.add('selected');
+        } else {
+            card.classList.remove('selected');
+        }
+
+        // 2. Check deletion state
+        if (deletedPhotos.has(fileName)) {
+            card.classList.add('deleted');
+        } else {
+            card.classList.remove('deleted');
+        }
+    });
+}
+
+

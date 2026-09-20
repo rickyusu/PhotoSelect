@@ -9,8 +9,10 @@
 </head>
 <body>
 
-    <h1>Photo Deletion Review</h1>
-    <p class="instructions">Tap or click on any photos you want to <strong>DELETE</strong>. A red border will mark your selections. When finished, tap the button at the bottom.</p>
+    <h1>Mary's Photo Selection Review</h1>
+    <p class="instructions">Tap or click on any photos you want to <strong>DELETE</strong>. 
+      A red border will mark your selections. When finished, tap the <strong>Submit Selection</strong> button at the bottom.</p>
+
 
     <div class="grid" id="photoGrid"> <!-- 100 Photos will load here --></div>
 
@@ -37,17 +39,16 @@
   <textarea name="message" id="hiddenPhotoList" style="display:none;"></textarea>
 
    <!-- 1. CHANGE type="submit" TO type="button" AND ADD onclick -->
-  <button class="btn" type="button" onclick="prepareAndMarkDeleted()">Submit Selection</button>
+  <button class="btn" type="button" onclick="prepareAndMarkDeleted()">Submit Current Page Selection</button>
   
   <!-- 🛠️ ADD THIS HIDDEN NATIVE SUBMIT BUTTON BELOW -->
   <button type="submit" id="realSubmitBtn" style="display:none;"></button>
 </form>
 
-   <!-- This button clears the memory and reloads the page to restore the photos 
-   <button type="button" onclick="resetPageMemory()" style="background-color: #ff4d4d; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
-     Next Page
+   <!-- This button clears the memory and reloads the page to restore the photos -->
+  &ensp; &ensp; <button class="btn" type="button" onclick="resetPageMemory()" style="background-color: #ff4d4d; color: white;">
+     Submit All Pages and Reset Page
    </button>
-   -->
 
 
     </div> <!-- footer -->
