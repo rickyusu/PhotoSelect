@@ -306,23 +306,31 @@ function prepareAndMarkDeleted() {
 
   const photoListText = photoListArray.join('\n'); 
 
-  // 📋 1. COPY TO CLIPBOARD CODE
+  // 📋 1. COPY TO CLIPBOARD CODE (Runs on both Mobile and Computer)
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(photoListText)
       .then(() => console.log("List copied to clipboard!"))
       .catch(err => console.error("Could not copy text: ", err));
   }
 
-  // 📸 Pop up your custom selection list message box
-  alert("You have selected the following photos:\n\n" + photoListText + "\n\nList copied to clipboard! Opening text message...");
+  // 📱 SMART MOBILE DETECTION
+  // Checks if the user is on an iPhone, iPad, Android phone, or mobile browser
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-  // 💬 2. SEND TEXT MESSAGE CODE
-  // Replace +1234567890 with your actual phone number (include country code)
-  const myPhoneNumber = "+1234567890"; 
-  const smsBody = encodeURIComponent("Here are my selected photos:\n" + photoListText);
-  
-  // This opens iMessage on iPhone or Messages on Android with the data ready
-  window.location.href = `sms:${myPhoneNumber}?&body=${smsBody}`;
+  if (isMobile) {
+    // Mobile Flow: Alert shows clipboard confirmation, then opens text message
+    alert("You have selected the following photos:\n\n" + photoListText + "\n\nList copied to clipboard! Opening text message...");
+
+    // Replace +1234567890 with your actual phone number (include country code)
+    const myPhoneNumber = "+1234567890"; 
+    const smsBody = encodeURIComponent("Here are my selected photos:\n" + photoListText);
+    
+    // Open native messaging app
+    window.location.href = `sms:${myPhoneNumber}?&body=${smsBody}`;
+  } else {
+    // Computer Flow: Alert confirms clipboard copy, completely skipping the phone app prompt!
+    alert("You have selected the following photos:\n\n" + photoListText + "\n\n📋 List copied to your clipboard! You can now paste (Ctrl+V) it anywhere.");
+  }
 
   // Package names for Web3Forms email delivery
   document.getElementById('hiddenPhotoList').value = photoListText; 
@@ -347,13 +355,16 @@ function prepareAndMarkDeleted() {
 
 
   // 🛠️ SMART ENVIRONMENT CHECK:
+  // 1. Calculate how long to wait based on the device
+const waitTime = isMobile ? 800 : 50;
+
   if (window.location.protocol.startsWith('http')) {
     alert("Internet Test Mode: Selection list saved and images grayed out successfully!");
     // Wait slightly for the SMS app redirection handoff before completing the email form submit
     setTimeout(() => {
       // Delay sending email
       // document.getElementById('realSubmitBtn').click();
-    }, 800);
+    }, waitTime);
   } else {
     // If testing locally (file:///), skip the live submit so the browser doesn't crash
     alert("💻 Local Test Mode: Selection list saved, copied, and images grayed out successfully!");
