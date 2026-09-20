@@ -267,10 +267,9 @@ async function sendListToEmail() {
   }
 }
 
+// -----------------
 
-async function prepareAndSend(event) {
-  event.preventDefault();
-
+function prepareAndMarkDeleted() {
   const selectedElements = document.querySelectorAll('.selected');
   
   if (selectedElements.length === 0) {
@@ -279,6 +278,8 @@ async function prepareAndSend(event) {
   }
 
   let photoListArray = [];
+  // Grab any previously deleted photos from memory so we don't overwrite them
+  let deletedPhotosList = JSON.parse(localStorage.getItem('deletedPhotos')) || [];
 
   selectedElements.forEach((element) => {
     let nameFound = "";
@@ -295,156 +296,58 @@ async function prepareAndSend(event) {
     }
 
     if (nameFound) {
-      photoListArray.push(decodeURIComponent(nameFound));
+      const cleanName = decodeURIComponent(nameFound);
+      photoListArray.push(cleanName);
+      
+      // Add the photo to our permanent deletion tracking list if it isn't already there
+      if (!deletedPhotosList.includes(cleanName)) {
+        deletedPhotosList.push(cleanName);
+      }
     }
   });
 
-  const photoListText = photoListArray.join('\n'); 
-
-  // 1. Prepare the payload to send in the background
-  const formData = {
-    access_key: "YOUR_ACCESS_KEY_HERE", // 👈 Make sure your actual key is pasted here
-    subject: "📸 New Photo Selection Received!",
-    from_name: "Photo Selector Webpage",
-    message: photoListText
-  };
-
-  // 2. Send the data silently first
-  try {
-    const response = await fetch('https://web3forms.com', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify(formData)
-    });
-
-    const result = await response.json();
-
-    if (result.success) {
-      // 3. ✨ SUCCESS: Dim the images AFTER the email goes through
-      selectedElements.forEach((element) => {
-        element.classList.remove('selected'); 
-        
-        element.style.setProperty('opacity', '0.2', 'important');
-        element.style.setProperty('filter', 'grayscale(100%)', 'important');
-        element.style.setProperty('pointer-events', 'none', 'important'); 
-
-        const internalImg = element.tagName === 'IMG' ? element : element.querySelector('img');
-        if (internalImg) {
-          internalImg.style.setProperty('opacity', '0.2', 'important');
-          internalImg.style.setProperty('filter', 'grayscale(100%)', 'important');
-        }
-      });
-
-      // Show the success message after they turn gray
-      alert("🎉 Email sent successfully! Your selections are now marked as sent."); 
-    } else {
-      alert("❌ Web3Forms error: " + result.message);
-    }
-  } catch (error) {
-    console.error("Network log error:", error);
-    alert("❌ Network Error: Could not connect to the email server.");
-  }
+  // 1. Package the file names cleanly (one per line, no dashes) for the email
+  document.getElementById('hiddenPhotoList').value = photoListArray.join('\n'); 
+  
+  // 2. Save the updated list to browser storage before leaving the page
+  localStorage.setItem('deletedPhotos', JSON.stringify(deletedPhotosList));
 }
 
-// -----------------
+// Automatically runs whenever the webpage loads or when you press the 'Back' arrow
+function applyDimmingEffects() {
+  const savedDeletions = JSON.parse(localStorage.getItem('deletedPhotos')) || [];
+  
+  // Scans all photos/containers on your screen
+  const allItems = document.querySelectorAll('img, .photo-box'); 
+  
+  allItems.forEach(element => {
+    let name = "";
+    if (element.tagName === 'IMG' && element.src) name = element.src.split('/').pop();
+    else if (element.querySelector('img')) name = element.querySelector('img').src.split('/').pop();
 
-    function prepareAndMarkDeleted() {
-      // Find all elements currently selected by the user
-      const selectedElements = document.querySelectorAll('.selected');
-      
-      if (selectedElements.length === 0) {
-        alert("Please select at least one photo before submitting.");
-        return;
-      }
-
-      let photoListArray = [];
-      let deletedPhotosList = JSON.parse(localStorage.getItem('deletedPhotos')) || [];
-
-      selectedElements.forEach((element) => {
-        let nameFound = "";
-
-        // Extract filename from an image tag directly
-        if (element.tagName === 'IMG' && element.src) {
-          nameFound = element.src.split('/').pop();
-        } 
-        // Extract filename from an image inside a wrapper box container
-        else if (element.querySelector('img')) {
-          const innerImg = element.querySelector('img');
-          nameFound = innerImg.src.split('/').pop();
-        } 
-        // Fallback to text string inside the container item
-        else if (element.innerText) {
-          nameFound = element.innerText.trim();
-        }
-
-        if (nameFound) {
-          // Convert to lowercase to guarantee case-insensitive match on GitHub Pages
-          const cleanName = decodeURIComponent(nameFound).toLowerCase();
-          photoListArray.push(cleanName);
-          
-          if (!deletedPhotosList.includes(cleanName)) {
-            deletedPhotosList.push(cleanName);
-          }
-        }
-      });
-
-      // 1. Pack clean filenames separated strictly by a line break into the email field
-      document.getElementById('hiddenPhotoList').value = photoListArray.join('\n'); 
-      
-      // 2. Commit updates to browser local storage memory immediately
-      localStorage.setItem('deletedPhotos', JSON.stringify(deletedPhotosList));
-
-      // 3. Force visual grayscale dimming on screen instantly before form routes away
-      selectedElements.forEach((element) => {
-        element.classList.remove('selected');
-        
-        element.style.setProperty('opacity', '0.2', 'important');
-        element.style.setProperty('filter', 'grayscale(100%)', 'important');
-        element.style.setProperty('pointer-events', 'none', 'important');
-
-        const internalImg = element.tagName === 'IMG' ? element : element.querySelector('img');
-        if (internalImg) {
-          internalImg.style.setProperty('opacity', '0.2', 'important');
-          internalImg.style.setProperty('filter', 'grayscale(100%)', 'important');
-        }
-      });
+    // If this photo filename is found in our deleted list history, dim it completely
+    if (savedDeletions.includes(decodeURIComponent(name))) {
+      element.classList.remove('selected');
+      element.style.setProperty('opacity', '0.2', 'important');
+      element.style.setProperty('filter', 'grayscale(100%)', 'important');
+      element.style.setProperty('pointer-events', 'none', 'important');
     }
+  });
+}
 
-    // Automatically scans and handles dimming layout on initialization
-    function applyDimmingEffects() {
-      const savedDeletions = JSON.parse(localStorage.getItem('deletedPhotos')) || [];
-      
-      // Target both raw images and container wrapper boxes
-      const allItems = document.querySelectorAll('img, .photo-box'); 
-      
-      allItems.forEach(element => {
-        let name = "";
-        if (element.tagName === 'IMG' && element.src) name = element.src.split('/').pop();
-        else if (element.querySelector('img')) name = element.querySelector('img').src.split('/').pop();
+// Fire the scan automatically when the page loads up
+window.addEventListener('DOMContentLoaded', applyDimmingEffects);
 
-        const lowercaseName = decodeURIComponent(name).toLowerCase();
+//========================
 
-        if (savedDeletions.includes(lowercaseName)) {
-          element.classList.remove('selected');
-          element.style.setProperty('opacity', '0.2', 'important');
-          element.style.setProperty('filter', 'grayscale(100%)', 'important');
-          element.style.setProperty('pointer-events', 'none', 'important');
-        }
-      });
-    }
-
-    // Function to clear data memory back to original full color state
-    function resetPageMemory() {
-      if (confirm("Are you sure you want to restore all photos and clear your selection history?")) {
-        localStorage.removeItem('deletedPhotos');
-        window.location.reload();
-      }
-    }
-
-    // Run memory check tracking instantly whenever window loading processes complete
-    window.addEventListener('DOMContentLoaded', applyDimmingEffects);
-
+function resetPageMemory() {
+  // Confirm with the user first so they don't click it by accident
+  if (confirm("Are you sure you want to restore all photos and clear the selection history?")) {
     
+    // 1. Wipe out the permanent tracking list from the browser memory
+    localStorage.removeItem('deletedPhotos');
+    
+    // 2. Reload the page instantly to bring all images back to full color
+    window.location.reload();
+  }
+}

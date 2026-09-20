@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Photo Selection Tool</title>
+    <title>Photo Selector Tool</title>
     <link rel="stylesheet" href="style.css" />
-    
 </head>
 <body>
+
+
 
     <h1>Photo Deletion Review</h1>
     <p class="instructions">Tap or click on any photos you want to <strong>DELETE</strong>. A red border will mark your selections. When finished, tap the button at the bottom.</p>
@@ -15,30 +16,14 @@
     <div class="grid" id="photoGrid"></div>
 
     <div class="footer-bar">
-       <!--
-        <button class="btn" onclick="generateList()">Done! Get My List</button>
-        <button class="btn"  onclick="sendListToEmail()"> Submit Selection</button>
-    
 
-<form action="https://web3forms.com" method="POST" id="photoForm" onsubmit="prepareAndMarkDeleted()">
-    1. Paste your exact Web3Forms Access Key below 
-  <input type="hidden" name="access_key" value="3dda0e4c-6471-46d2-81b4-37a9fc909736">
-  <input type="hidden" name="subject" value="📸 New Photo Selection Received!">  
-   ⚠️ REPLACE THIS VALUE WITH YOUR LIVE GITHUB WEBSITE LINK 
-  <input type="hidden" name="redirect" value="https://rickyusu.github.io/PhotoSelect/?status=success">
-
-  <input type="hidden" name="name" value= "Jeta Link">
-  <input type="hidden" name="email" value= "jetalinkinc@gmail.com">
-   2. This hidden text box will hold your photo list 
-  <textarea name="message" id="hiddenPhotoList" style="display:none;"></textarea>
-
-   3. Clicking this will compile the list and send the email automatically 
-  <button class="btn" type="submit" onclick="prepareAndSend(event)">Submit Selection</button>
-</form>
+    <!-- 
+      =========================================
+      1. UN-BLOCKABLE EMAIL FORM
+      =========================================
     -->
-
-<form action="https://api.web3forms.com/submit" method="POST" id="photoForm" onsubmit="prepareAndMarkDeleted()">
-  <!-- Paste your exact Web3Forms Access Key below -->
+    <form action="https://web3forms.com" method="POST" id="photoForm" onsubmit="prepareAndMarkDeleted()">
+        <!-- ⚠️ PASTE YOUR WEB3FORMS ACCESS KEY IN THE VALUE BELOW -->
   <input type="hidden" name="access_key" value="3dda0e4c-6471-46d2-81b4-37a9fc909736">
   <input type="hidden" name="subject" value="📸 New Photo Selection Received!">
   
@@ -48,16 +33,12 @@
   <!-- Hidden text box to hold the clean file list -->
   <textarea name="message" id="hiddenPhotoList" style="display:none;"></textarea>
 
-  <button class="btn" type="button" onclick="prepareAndMarkDeleted(event)">Submit Selection</button>
-</form>
+  <button class="btn" type="submit" onclick="prepareAndMarkDeleted(event)">Submit Selection</button>
+        <button type="button" class="btn-reset" onclick="resetPageMemory()">Reset Page</button>
+    </form>
 
-   <!-- This button clears the memory and reloads the page to restore the photos -->
-   <button type="button" onclick="resetPageMemory()" style="background-color: #ff4d4d; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">
-     Reset Page
-   </button>
 
     </div>
-
 
 
 
@@ -77,3 +58,4 @@
 
 </body>
 </html>
+
