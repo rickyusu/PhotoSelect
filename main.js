@@ -269,10 +269,8 @@ async function sendListToEmail() {
 
 
 async function prepareAndSend(event) {
-  // 1. Stop the browser from using the old native page redirection
-  if (event) event.preventDefault();
+  event.preventDefault();
 
-  // 2. Scan the webpage for your selected items
   const selectedElements = document.querySelectorAll('.selected');
   
   if (selectedElements.length === 0) {
@@ -303,24 +301,29 @@ async function prepareAndSend(event) {
 
   const photoListText = photoListArray.join('\n'); 
 
-  // 3. Use standard FormData structure (fixes network/CORS blocks)
-  const formData = new FormData();
-  formData.append("access_key", "YOUR_ACCESS_KEY_HERE"); // 👈 Make sure your actual key is pasted here
-  formData.append("subject", "📸 New Photo Selection Received!");
-  formData.append("from_name", "Photo Selector Webpage");
-  formData.append("message", photoListText);
+  // 1. Prepare the payload to send in the background
+  const formData = {
+    access_key: "YOUR_ACCESS_KEY_HERE", // 👈 Make sure your actual key is pasted here
+    subject: "📸 New Photo Selection Received!",
+    from_name: "Photo Selector Webpage",
+    message: photoListText
+  };
 
-  // 4. Send the data silently first
+  // 2. Send the data silently first
   try {
     const response = await fetch('https://web3forms.com', {
       method: 'POST',
-      body: formData // Sending as FormData bypasses strict JSON cross-origin checks
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify(formData)
     });
 
     const result = await response.json();
 
     if (result.success) {
-      // 5. ✨ SUCCESS: Dim the images AFTER the email goes through successfully
+      // 3. ✨ SUCCESS: Dim the images AFTER the email goes through
       selectedElements.forEach((element) => {
         element.classList.remove('selected'); 
         
@@ -335,17 +338,16 @@ async function prepareAndSend(event) {
         }
       });
 
-      // Show the success message on your screen
+      // Show the success message after they turn gray
       alert("🎉 Email sent successfully! Your selections are now marked as sent."); 
     } else {
       alert("❌ Web3Forms error: " + result.message);
     }
   } catch (error) {
     console.error("Network log error:", error);
-    alert("❌ Network Error: The browser blocked the background connection. Check your access key or try turning off privacy extensions/adblockers.");
+    alert("❌ Network Error: Could not connect to the email server.");
   }
 }
-
 
 function prepareAndMarkDeleted() {
   const selectedElements = document.querySelectorAll('.selected');
@@ -382,22 +384,7 @@ function prepareAndMarkDeleted() {
   // 1. Package clean filenames for the email delivery
   document.getElementById('hiddenPhotoList').value = photoListArray.join('\n'); 
   
-  // 2. 🛠️ FIXED: Safe Redirection Assignment
-  const redirectInput = document.querySelector('input[name="redirect"]');
-  if (redirectInput) {
-    // Take ONLY the clean base URL before any existing '?' marks
-    const currentUrlBase = window.location.href.split('?')[0];
-    
-    // ONLY use the custom redirect if we are on the live website (http/https)
-    if (currentUrlBase.startsWith('http')) {
-      redirectInput.value = currentUrlBase + "?status=success";
-    } else {
-      // If testing locally (file:///), remove the redirect rule so Web3Forms doesn't crash
-      redirectInput.removeAttribute('name'); 
-    }
-  }
-  
-  // 3. Queue selections into temporary browser memory 
+  // 2. Queue selections into temporary browser memory 
   localStorage.setItem('pendingDeletions', JSON.stringify(photoListArray));
 }
 
@@ -439,4 +426,3 @@ function checkUrlAndApplyDimming() {
 
 // Trigger state layout check on execution
 window.addEventListener('DOMContentLoaded', checkUrlAndApplyDimming);
-
