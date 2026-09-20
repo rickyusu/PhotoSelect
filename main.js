@@ -358,7 +358,6 @@ function prepareAndMarkDeleted() {
   }
 
   let photoListArray = [];
-  // Grab any previously deleted photos from memory so we don't overwrite them
   let deletedPhotosList = JSON.parse(localStorage.getItem('deletedPhotos')) || [];
 
   selectedElements.forEach((element) => {
@@ -376,28 +375,24 @@ function prepareAndMarkDeleted() {
     }
 
     if (nameFound) {
-      const cleanName = decodeURIComponent(nameFound);
+      // 🛠️ FIX 1: Convert filename to lowercase before saving to memory
+      const cleanName = decodeURIComponent(nameFound).toLowerCase();
       photoListArray.push(cleanName);
       
-      // Add the photo to our permanent deletion tracking list if it isn't already there
       if (!deletedPhotosList.includes(cleanName)) {
         deletedPhotosList.push(cleanName);
       }
     }
   });
 
-  // 1. Package the file names cleanly (one per line, no dashes) for the email
   document.getElementById('hiddenPhotoList').value = photoListArray.join('\n'); 
-  
-  // 2. Save the updated list to browser storage before leaving the page
   localStorage.setItem('deletedPhotos', JSON.stringify(deletedPhotosList));
 }
 
-// Automatically runs whenever the webpage loads or when you press the 'Back' arrow
 function applyDimmingEffects() {
   const savedDeletions = JSON.parse(localStorage.getItem('deletedPhotos')) || [];
   
-  // Scans all photos/containers on your screen
+  // Make sure we scan all image variables or photo container boxes
   const allItems = document.querySelectorAll('img, .photo-box'); 
   
   allItems.forEach(element => {
@@ -405,8 +400,10 @@ function applyDimmingEffects() {
     if (element.tagName === 'IMG' && element.src) name = element.src.split('/').pop();
     else if (element.querySelector('img')) name = element.querySelector('img').src.split('/').pop();
 
-    // If this photo filename is found in our deleted list history, dim it completely
-    if (savedDeletions.includes(decodeURIComponent(name))) {
+    // 🛠️ FIX 2: Convert live element filenames to lowercase to guarantee a match
+    const lowercaseName = decodeURIComponent(name).toLowerCase();
+
+    if (savedDeletions.includes(lowercaseName)) {
       element.classList.remove('selected');
       element.style.setProperty('opacity', '0.2', 'important');
       element.style.setProperty('filter', 'grayscale(100%)', 'important');
@@ -414,6 +411,8 @@ function applyDimmingEffects() {
     }
   });
 }
+
+window.addEventListener('DOMContentLoaded', applyDimmingEffects);
 
 // Fire the scan automatically when the page loads up
 window.addEventListener('DOMContentLoaded', applyDimmingEffects);
