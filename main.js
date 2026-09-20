@@ -269,14 +269,13 @@ async function sendListToEmail() {
 
 // -----------------
 
-function prepareAndMarkDeleted() {
-  // 1. ✨ THE REPAIR HOOK: Capture and freeze the browser window timeline
-  // This replaces 'event.preventDefault()' without changing your HTML attribute setup!
-  if (window.event) {
-    window.event.preventDefault();
+
+function prepareAndMarkDeleted(event) {
+  // 1. Stop the browser from instantly breaking/reloading
+  if (event) {
+    event.preventDefault();
   }
 
-  // Find all elements currently selected by the user
   const selectedElements = document.querySelectorAll('.selected');
   
   if (selectedElements.length === 0) {
@@ -305,7 +304,6 @@ function prepareAndMarkDeleted() {
       const cleanName = decodeURIComponent(nameFound);
       photoListArray.push(cleanName); 
       
-      // Store filename as lowercase in internal memory for case-insensitive matching on GitHub Pages
       if (!deletedPhotosList.includes(cleanName.toLowerCase())) {
         deletedPhotosList.push(cleanName.toLowerCase());
       }
@@ -314,16 +312,16 @@ function prepareAndMarkDeleted() {
 
   const photoListText = photoListArray.join('\n'); 
 
-  // 📸 Pop up the direct display message box tracking your clean file choices
-  alert("You have selected the following photos:\n\n" + photoListText + "\n\nSending your email now...");
+  // 📸 Pop up your custom selection list message box
+  alert("You have selected the following photos:\n\n" + photoListText + "\n\nProcessing selection...");
 
-  // 2. Safely output the compiled filenames into your form's message textarea
+  // Package names for Web3Forms email delivery
   document.getElementById('hiddenPhotoList').value = photoListText; 
   
-  // 3. Commit selections to browser local storage memory immediately
+  // Commit to browser local storage memory immediately
   localStorage.setItem('deletedPhotos', JSON.stringify(deletedPhotosList));
 
-  // 4. Force visual grayscale dimming on screen instantly
+  // Force visual grayscale dimming on screen instantly
   selectedElements.forEach((element) => {
     element.classList.remove('selected');
     
@@ -338,30 +336,16 @@ function prepareAndMarkDeleted() {
     }
   });
 
-  // 5. 🚀 Submit the form explicitly now that memory writing and dimming are secure!
-  // This bypasses background script limitations entirely
-  document.getElementById('photoForm').submit();
+  // 🛠️ SMART ENVIRONMENT CHECK:
+  // If we are on the live web (http/https), send the email!
+  if (window.location.protocol.startsWith('http')) {
+    document.getElementById('photoForm').submit();
+  } else {
+    // If testing locally (file:///), skip the live submit so the browser doesn't crash
+    alert("💻 Local Test Mode: Selection list saved and images grayed out successfully! (Email submission skipped until pushed to GitHub)");
+  }
 }
 
-function applyDimmingEffects() {
-  const savedDeletions = JSON.parse(localStorage.getItem('deletedPhotos')) || [];
-  const allItems = document.querySelectorAll('img, .photo-box'); 
-  
-  allItems.forEach(element => {
-    let name = "";
-    if (element.tagName === 'IMG' && element.src) name = element.src.split('/').pop();
-    else if (element.querySelector('img')) name = element.querySelector('img').src.split('/').pop();
-
-    const lowercaseName = decodeURIComponent(name).toLowerCase();
-
-    if (savedDeletions.includes(lowercaseName)) {
-      element.classList.remove('selected');
-      element.style.setProperty('opacity', '0.2', 'important');
-      element.style.setProperty('filter', 'grayscale(100%)', 'important');
-      element.style.setProperty('pointer-events', 'none', 'important');
-    }
-  });
-}
 
 function resetPageMemory() {
   if (confirm("Are you sure you want to restore all photos and clear your selection history?")) {

@@ -35,16 +35,15 @@
    3. Clicking this will compile the list and send the email automatically 
   <button class="btn" type="submit" onclick="prepareAndSend(event)">Submit Selection</button>
 </form>
-    -->
-<form action="https://api.web3forms.com/submit" method="POST" id="photoForm" onsubmit="prepareAndMarkDeleted()">
-  <!-- Paste your exact Web3Forms Access Key below -->
+    --><!-- Add 'event' inside the prepareAndMarkDeleted parentheses -->
+     
+<form action="https://web3forms.com" method="POST" id="photoForm" onsubmit="prepareAndMarkDeleted(event)">
   <input type="hidden" name="access_key" value="3dda0e4c-6471-46d2-81b4-37a9fc909736">
   <input type="hidden" name="subject" value="📸 New Photo Selection Received!">
   
-  <input type="hidden" name="name" value= "Jeta Link">
-  <input type="hidden" name="email" value= "jetalinkinc@gmail.com">
+  <input type="hidden" name="name" value="Jeta Link">
+  <input type="hidden" name="email" value="jetalinkinc@gmail.com">
 
-  <!-- Hidden text box to hold the clean file list -->
   <textarea name="message" id="hiddenPhotoList" style="display:none;"></textarea>
 
   <button class="btn" type="submit">Submit Selection</button>
