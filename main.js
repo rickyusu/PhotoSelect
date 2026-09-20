@@ -306,8 +306,23 @@ function prepareAndMarkDeleted() {
 
   const photoListText = photoListArray.join('\n'); 
 
+  // 📋 1. COPY TO CLIPBOARD CODE
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(photoListText)
+      .then(() => console.log("List copied to clipboard!"))
+      .catch(err => console.error("Could not copy text: ", err));
+  }
+
   // 📸 Pop up your custom selection list message box
-  alert("You have selected the following photos:\n\n" + photoListText + "\n\nSending your email now...");
+  alert("You have selected the following photos:\n\n" + photoListText + "\n\nList copied to clipboard! Opening text message...");
+
+  // 💬 2. SEND TEXT MESSAGE CODE
+  // Replace +1234567890 with your actual phone number (include country code)
+  const myPhoneNumber = "+1234567890"; 
+  const smsBody = encodeURIComponent("Here are my selected photos:\n" + photoListText);
+  
+  // This opens iMessage on iPhone or Messages on Android with the data ready
+  window.location.href = `sms:${myPhoneNumber}?&body=${smsBody}`;
 
   // Package names for Web3Forms email delivery
   document.getElementById('hiddenPhotoList').value = photoListText; 
@@ -330,17 +345,20 @@ function prepareAndMarkDeleted() {
     }
   });
 
+
   // 🛠️ SMART ENVIRONMENT CHECK:
-  // If we are on the live web (http/https), send the email!
   if (window.location.protocol.startsWith('http')) {
     alert("Internet Test Mode: Selection list saved and images grayed out successfully!");
-    // 2. REPLACED LINE: Click the hidden button to force a clean POST submission
-    document.getElementById('realSubmitBtn').click();
+    // Wait slightly for the SMS app redirection handoff before completing the email form submit
+    setTimeout(() => {
+      document.getElementById('realSubmitBtn').click();
+    }, 800);
   } else {
     // If testing locally (file:///), skip the live submit so the browser doesn't crash
-    alert("💻 Local Test Mode: Selection list saved and images grayed out successfully! (Email submission skipped until pushed to GitHub)");
+    alert("💻 Local Test Mode: Selection list saved, copied, and images grayed out successfully!");
   }
 }
+
 
 
 function resetPageMemory() {
