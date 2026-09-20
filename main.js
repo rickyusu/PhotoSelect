@@ -266,3 +266,46 @@ async function sendListToEmail() {
     alert("❌ Network Error: Could not connect to the email server.");
   }
 }
+
+
+function prepareAndSend(event) {
+  // 1. Scan the webpage for your selected items
+  const selectedElements = document.querySelectorAll('.selected');
+  
+  if (selectedElements.length === 0) {
+    alert("Please select at least one photo before submitting.");
+    event.preventDefault();
+    return;
+  }
+
+  let photoListArray = [];
+
+  selectedElements.forEach((element) => {
+    let nameFound = "";
+
+    // Method A: If the selected item is the image itself, get its filename
+    if (element.tagName === 'IMG' && element.src) {
+      nameFound = element.src.split('/').pop();
+    } 
+    // Method B: If the selected item is a wrapper box, find the image inside it
+    else if (element.querySelector('img')) {
+      const innerImg = element.querySelector('img');
+      nameFound = innerImg.src.split('/').pop();
+    } 
+    // Fallback: If no image element, grab whatever clean text is there
+    else if (element.innerText) {
+      nameFound = element.innerText.trim();
+    }
+
+    // Add to our list only if we found a valid name
+    if (nameFound) {
+      photoListArray.push(decodeURIComponent(nameFound));
+    }
+  });
+
+  // 2. Combine the names using ONLY a line break (no symbols, no dashes)
+  const photoListText = photoListArray.join('\n'); 
+  document.getElementById('hiddenPhotoList').value = photoListText;
+  
+  alert("Sending your " + photoListArray.length + " photo selections now...");
+}
