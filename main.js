@@ -340,7 +340,10 @@ function prepareAndMarkDeleted(event) {
   // If we are on the live web (http/https), send the email!
   if (window.location.protocol.startsWith('http')) {
     alert("Internet Test Mode: Selection list saved and images grayed out successfully!");
-    document.getElementById('photoForm').submit();
+    // 1. Remove the onsubmit attribute temporarily so we don't cause an infinite loop
+    document.getElementById('photoForm').removeAttribute('onsubmit');    
+    // 2. REPLACED LINE: Click the hidden button to force a clean POST submission
+    document.getElementById('realSubmitBtn').click();
   } else {
     // If testing locally (file:///), skip the live submit so the browser doesn't crash
     alert("💻 Local Test Mode: Selection list saved and images grayed out successfully! (Email submission skipped until pushed to GitHub)");
