@@ -269,13 +269,7 @@ async function sendListToEmail() {
 
 // -----------------
 
-
-function prepareAndMarkDeleted(event) {
-  // 1. Stop the browser from instantly breaking/reloading
-  if (event) {
-    event.preventDefault();
-  }
-
+function prepareAndMarkDeleted() {
   const selectedElements = document.querySelectorAll('.selected');
   
   if (selectedElements.length === 0) {
@@ -313,7 +307,7 @@ function prepareAndMarkDeleted(event) {
   const photoListText = photoListArray.join('\n'); 
 
   // 📸 Pop up your custom selection list message box
-  alert("You have selected the following photos:\n\n" + photoListText + "\n\nProcessing selection...");
+  alert("You have selected the following photos:\n\n" + photoListText + "\n\nSending your email now...");
 
   // Package names for Web3Forms email delivery
   document.getElementById('hiddenPhotoList').value = photoListText; 
@@ -340,8 +334,6 @@ function prepareAndMarkDeleted(event) {
   // If we are on the live web (http/https), send the email!
   if (window.location.protocol.startsWith('http')) {
     alert("Internet Test Mode: Selection list saved and images grayed out successfully!");
-    // 1. Remove the onsubmit attribute temporarily so we don't cause an infinite loop
-    document.getElementById('photoForm').removeAttribute('onsubmit');    
     // 2. REPLACED LINE: Click the hidden button to force a clean POST submission
     document.getElementById('realSubmitBtn').click();
   } else {
