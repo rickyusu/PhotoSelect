@@ -16,11 +16,10 @@ let rawPhotoList = [];
 // 3. ADD THE NEW PAGINATION STATE Variables
 let currentPage = 1;
 const photosPerPage = 100;
-const totalPages = Math.ceil(rawPhotoList.length / photosPerPage);
+let totalPages = 1;
 
 // rawPhotoListText
 async function initPhotoFiles() {
-   alert("Try load file!!!");
     try {
         // Fetch your text file with a cache-buster
         const response = await fetch('photolist.txt');
@@ -41,11 +40,10 @@ async function initPhotoFiles() {
         alert(rawPhotoList);
         // Call your UI building functions here, now that the global variable is filled
         // buildVideoUI(); 
-
+        totalPages = Math.ceil(rawPhotoList.length / photosPerPage);
     } catch (err) {
         console.error("Error loading file:", err.message);
     }
- alert("Finish load file!!!");
 }
 
 
