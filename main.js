@@ -1311,7 +1311,7 @@ const waitTime = isMobile ? 800 : 50;
     // Wait slightly for the SMS app redirection handoff before completing the email form submit
     setTimeout(() => {
       // Delay sending email
-      // document.getElementById('realSubmitBtn').click();
+      document.getElementById('realSubmitBtn').click();
     }, waitTime);
   } else {
     // If testing locally (file:///), skip the live submit so the browser doesn't crash
