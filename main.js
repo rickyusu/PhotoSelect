@@ -1380,4 +1380,38 @@ function updatePageVisuals() {
     });
 }
 
+// Example of how you can dynamically generate the card content
+function createMediaCard(fileName) {
+    const isVideo = fileName.endsWith('.mp4') || fileName.endsWith('.webm');
+    
+    let mediaHTML = '';
+    if (isVideo) {
+        // muted and playsinline are required for videos to autoplay smoothly on web browsers
+        mediaHTML = `<video src="${fileName}" muted loop playsinline class="card-media"></video>`;
+    } else {
+        mediaHTML = `<img src="${fileName}" class="card-media" />`;
+    }
 
+    return `
+        <div class="photo-card" data-filename="${fileName}">
+            ${mediaHTML}
+            <div class="card-controls">
+                <button class="select-btn">Select</button>
+                <button class="delete-btn">Delete</button>
+            </div>
+        </div>
+    `;
+}
+
+document.addEventListener('mouseover', (e) => {
+    if (e.target.tagName === 'VIDEO' && !e.target.closest('.photo-card').classList.contains('deleted')) {
+        e.target.play().catch(err => console.log("Autoplay blocked:", err));
+    }
+});
+
+document.addEventListener('mouseout', (e) => {
+    if (e.target.tagName === 'VIDEO') {
+        e.target.pause();
+        e.target.currentTime = 0; // Rewind to beginning when mouse leaves
+    }
+});
