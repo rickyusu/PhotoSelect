@@ -1329,7 +1329,6 @@ function resetPageMemory() {
   }
 }
 
-window.addEventListener('DOMContentLoaded', applyDimmingEffects);
 
 
 function submitSelectedPhotos() {
