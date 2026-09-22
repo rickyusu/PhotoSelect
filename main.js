@@ -284,9 +284,7 @@ function submitAllSelectedPhotos() {
       .then(() => console.log("List copied to clipboard!"))
       .catch(err => console.error("Could not copy text: ", err));
   }
-  // text out
-  alert("ALL: Selected photos:\n\n" + outputText + "\n\nList copied to clipboard! Opening text message...");
-     
+  
   // 📱 SMART MOBILE DETECTION
   // Checks if the user is on an iPhone, iPad, Android phone, or mobile browser
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
