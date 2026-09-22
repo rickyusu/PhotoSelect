@@ -228,9 +228,9 @@ function prepareAndMarkDeleted() {
 
 function resetPageMemory() {
   if (confirm("Are you sure you want to restore all photos and clear your selection history?")) {
-    submitSelectedPhotos();
-    // localStorage.removeItem('deletedPhotos');
-    // window.location.reload();
+    // submitSelectedPhotos();
+    localStorage.removeItem('selectedPhotos');
+    window.location.reload();
   }
 }
 
@@ -260,42 +260,66 @@ function submitSelectedPhotos() {
 
 
 function submitAllSelectedPhotos() {
+
+  // 1. Convert the Set into a clean array of strings
+  const allSelectedFiles = Array.from(selectedPhotos);
+
+  // 2. Safety check: Check if they selected anything at all
+  if (allSelectedFiles.length === 0) {
+      alert("Please select at least one photo before submitting.");
+      return;
+  }
+
+  // 3. Process the entire list (Example: Log it or pass it to your backend)
+  console.log("Submitting all selected files across all pages:", allSelectedFiles);
+
+  // ---- YOUR ACTUAL SUBMISSION LOGIC HERE ----
+  // If you are formatting the text to copy/paste, you can do this:
+  const outputText = allSelectedFiles.join('\n');
   
-    // 1. Convert the Set into a clean array of strings
-    const allSelectedFiles = Array.from(selectedPhotos);
-
-    // 2. Safety check: Check if they selected anything at all
-    if (allSelectedFiles.length === 0) {
-        alert("Please select at least one photo before submitting.");
-        return;
-    }
-
-    // 3. Process the entire list (Example: Log it or pass it to your backend)
-    console.log("Submitting all selected files across all pages:", allSelectedFiles);
-
-    // ---- YOUR ACTUAL SUBMISSION LOGIC HERE ----
-    // If you are formatting the text to copy/paste, you can do this:
-    const outputText = allSelectedFiles.join('\n');
-    
-    // text out
-    alert("ALL: Selected photos:\n\n" + outputText + "\n\nList copied to clipboard! Opening text message...");
-    // Package names for Web3Forms email delivery
-    document.getElementById('hiddenAllPhotoList').value = outputText; 
-
-    
+  
+  // 📋 1. COPY TO CLIPBOARD CODE (Runs on both Mobile and Computer)
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(outputText)
+      .then(() => console.log("List copied to clipboard!"))
+      .catch(err => console.error("Could not copy text: ", err));
+  }
+  // text out
+  alert("ALL: Selected photos:\n\n" + outputText + "\n\nList copied to clipboard! Opening text message...");
+     
   // 📱 SMART MOBILE DETECTION
   // Checks if the user is on an iPhone, iPad, Android phone, or mobile browser
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  if (isMobile) {
+    // Mobile Flow: Alert shows clipboard confirmation, then opens text message
+    alert("You have selected the following photos:\n\n" + outputText + "\n\nList copied to clipboard! Opening text message...");
+
+    // Replace +1234567890 with your actual phone number (include country code)
+    const myPhoneNumber = "+19496482361"; 
+    const smsBody = encodeURIComponent("Here are my selected photos:\n" + outputText);
+    
+    // Open native messaging app
+    window.location.href = `sms:${myPhoneNumber}?&body=${smsBody}`;
+  } else {
+    // Computer Flow: Alert confirms clipboard copy, completely skipping the phone app prompt!
+    alert("You have selected the following photos:\n\n" + outputText + "\n\n📋 List copied to your clipboard! Will send by email.");
+  }
+
+  // Package names for Web3Forms email delivery
+  document.getElementById('hiddenAllPhotoList').value = outputText; 
+  localStorage.setItem('selectedPhotos', outputText);
+
   // 🛠️ SMART ENVIRONMENT CHECK:
   // 1. Calculate how long to wait based on the device
-const waitTime = isMobile ? 800 : 50;
+  const waitTime = isMobile ? 800 : 50;
 
   if (window.location.protocol.startsWith('http')) {
     alert("Internet Test Mode: Selection list saved and sent out by email successfully!");
     // Wait slightly for the SMS app redirection handoff before completing the email form submit
     setTimeout(() => {
       // Delay sending email
-      document.getElementById('realSubmitAllBtn').click();
+      // document.getElementById('realSubmitAllBtn').click();
     }, waitTime);
   } else {
     // If testing locally (file:///), skip the live submit so the browser doesn't crash

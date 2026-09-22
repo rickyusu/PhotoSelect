@@ -30,39 +30,24 @@
 
 <form action="https://api.web3forms.com/submit" method="POST" id="photoForm">
   <input type="hidden" name="access_key" value="3dda0e4c-6471-46d2-81b4-37a9fc909736">
-  <input type="hidden" name="subject" value="📸 New Photo Selection Received!">
-  
-  <input type="hidden" name="name" value="Jeta Link">
-  <input type="hidden" name="email" value="jetalinkinc@gmail.com">
-
-  <textarea name="message" id="hiddenPhotoList" style="display:none;"></textarea>
-
-   <!-- 1. CHANGE type="submit" TO type="button" AND ADD onclick -->
-  <button class="btn" type="button" onclick="prepareAndMarkDeleted()">Submit Page</button>
-  
-  <!-- 🛠️ ADD THIS HIDDEN NATIVE SUBMIT BUTTON BELOW -->
-  <button type="submit" id="realSubmitBtn" style="display:none;"></button>
-</form>
-
-<!-- This is the Submit All Button -->
-
-<form action="https://api.web3forms.com/submit" method="POST" id="AllphotoForm">
-  <input type="hidden" name="access_key" value="3dda0e4c-6471-46d2-81b4-37a9fc909736">
-  <input type="hidden" name="subject" value="📸 New Photo Selection Received!">
-    <input type="hidden" name="name" value="Mary Stump">
+  <input type="hidden" name="subject" value="📸 New Photo Selection Received!">  
+  <input type="hidden" name="name" value="Mary Stump">
   <input type="hidden" name="email" value="mpatstump@gmail.com">
 
   <textarea name="message" id="hiddenAllPhotoList" style="display:none;"></textarea>
 
    <!-- 1. CHANGE type="submit" TO type="button" AND ADD onclick -->
-  &ensp; &ensp; <button class="btn" type="button" onclick="submitAllSelectedPhotos()" style="background-color: #ff4d4d; color: white;">
-     Submit All
-   </button>
-    <!-- 🛠️ ADD THIS HIDDEN NATIVE SUBMIT BUTTON BELOW -->
+  <button class="btn" type="button" onclick="submitAllSelectedPhotos()">Submit Selection</button>
+  
+  <!-- 🛠️ ADD THIS HIDDEN NATIVE SUBMIT BUTTON BELOW -->
   <button type="submit" id="realSubmitAllBtn" style="display:none;"></button>
-
 </form>
 
+<!-- This is the Clear All Button -->
+
+  &ensp; &ensp; <button class="btn" type="button" onclick="resetPageMemory()" style="background-color: #ff4d4d; color: white;">
+    Reset Selection
+   </button>
 
 
     </div> <!-- footer -->
