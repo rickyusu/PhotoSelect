@@ -9,6 +9,7 @@
 const pCloudFolderBaseUrl = "https://filedn.com/lTh0v2Bogc301OgoFen42cL/ToDelete/"; 
 const selectedPhotos = new Set(); // Keeps track of selections across pages
 const deletedPhotos = new Set(); // Tracks items explicitly deleted/removed
+const WebMAIL_access_key = "3dda0e4c-6471-46d2-81b4-37a9fc909736";        // 1. UPDATE YOUR ADMIN EMAIL HERE
 
 // 2. TURN YOUR TEXT LIST INTO THE WORKING ARRAY
 let rawPhotoList = [];
@@ -208,7 +209,7 @@ function prepareAndMarkDeleted() {
 
   // 🛠️ SMART ENVIRONMENT CHECK:
   // 1. Calculate how long to wait based on the device
-const waitTime = isMobile ? 800 : 50;
+  const waitTime = isMobile ? 800 : 50;
 
   if (window.location.protocol.startsWith('http')) {
     alert("Internet Test Mode: Selection list saved and images grayed out successfully!");
