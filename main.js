@@ -324,6 +324,9 @@ function submitAllSelectedPhotos() {
     alert("💻 Local Test Mode: Selection list saved, copied successfully!");
   }
 
+  // Reset Memory
+  localStorage.removeItem('selectedPhotos');
+  window.location.reload();
 }
 
 // Run this immediately after the new page cards are added to the DOM
