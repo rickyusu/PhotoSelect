@@ -23,13 +23,6 @@
     transition: all 0.3s ease; /* Makes the gray-out transition look smooth */
 }
 
-/* Ensure both images and videos fit perfectly inside your cards */
-.photo-card .card-media {
-    width: 100%;
-    height: 200px;         /* Or whatever your preferred height is */
-    object-fit: cover;     /* Crops the media cleanly without stretching it */
-}
-
 .photo-label {
     margin-top: 8px;
     font-size: 12px;
