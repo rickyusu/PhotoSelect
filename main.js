@@ -129,7 +129,7 @@ function resetPageMemory() {
 
 
 // OK: submitAllSelectedPhotos()
-function submitAllSelectedPhotos() {
+function submitAllSelectedPhotosPPP() {
 
   // 1. Convert the Set into a clean array of strings
   const allSelectedFiles = Array.from(selectedPhotos);
@@ -183,7 +183,6 @@ function submitAllSelectedPhotos() {
     alert("Internet Test Mode: Selection list saved and sent out by email successfully!");
     // Delay sending email
     document.getElementById('realSubmitAllBtn').click();
-    alert("Wmail Sent?!");
   } else {
     // If testing locally (file:///), skip the live submit so the browser doesn't crash
     alert("💻 Local Test Mode: Selection list saved, copied successfully!");
@@ -196,6 +195,50 @@ function submitAllSelectedPhotos() {
   window.location.reload();
 }
 
+function submitAllSelectedPhotos() {
+  
+    // 1. Convert the Set into a clean array of strings
+    const allSelectedFiles = Array.from(selectedPhotos);
+
+    // 2. Safety check: Check if they selected anything at all
+    if (allSelectedFiles.length === 0) {
+        alert("Please select at least one photo before submitting.");
+        return;
+    }
+
+    // 3. Process the entire list (Example: Log it or pass it to your backend)
+    console.log("Submitting all selected files across all pages:", allSelectedFiles);
+
+    // ---- YOUR ACTUAL SUBMISSION LOGIC HERE ----
+    // If you are formatting the text to copy/paste, you can do this:
+    const outputText = allSelectedFiles.join('\n');
+    
+    // text out
+    alert("ALL: Selected photos:\n\n" + outputText + "\n\nList copied to clipboard! Opening text message...");
+    // Package names for Web3Forms email delivery
+    document.getElementById('hiddenAllPhotoList').value = outputText; 
+
+    
+  // 📱 SMART MOBILE DETECTION
+  // Checks if the user is on an iPhone, iPad, Android phone, or mobile browser
+  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  // 🛠️ SMART ENVIRONMENT CHECK:
+  // 1. Calculate how long to wait based on the device
+const waitTime = isMobile ? 800 : 50;
+
+  if (window.location.protocol.startsWith('http')) {
+    alert("Internet Test Mode: Selection list saved and sent out by email successfully!");
+    // Wait slightly for the SMS app redirection handoff before completing the email form submit
+    setTimeout(() => {
+      // Delay sending email
+      document.getElementById('realSubmitAllBtn').click();
+    }, waitTime);
+  } else {
+    // If testing locally (file:///), skip the live submit so the browser doesn't crash
+    alert("💻 Local Test Mode: Selection list saved, copied successfully!");
+  }
+
+}
 
 // Run this immediately after the new page cards are added to the DOM
 function updatePageVisuals() {
