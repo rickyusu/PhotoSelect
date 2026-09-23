@@ -176,13 +176,14 @@ function submitAllSelectedPhotos() {
 
   // Package names for Web3Forms email delivery
   document.getElementById('hiddenAllPhotoList').value = outputText; 
-  localStorage.setItem('selectedPhotos', outputText);
+  // localStorage.setItem('selectedPhotos', outputText);
 
   // 🛠️ SMART ENVIRONMENT CHECK:
   if (window.location.protocol.startsWith('http')) {
     alert("Internet Test Mode: Selection list saved and sent out by email successfully!");
     // Delay sending email
     document.getElementById('realSubmitAllBtn').click();
+    alert("Wmail Sent?!");
   } else {
     // If testing locally (file:///), skip the live submit so the browser doesn't crash
     alert("💻 Local Test Mode: Selection list saved, copied successfully!");
