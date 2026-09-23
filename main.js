@@ -179,16 +179,10 @@ function submitAllSelectedPhotos() {
   localStorage.setItem('selectedPhotos', outputText);
 
   // 🛠️ SMART ENVIRONMENT CHECK:
-  // 1. Calculate how long to wait based on the device
-  const waitTime = isMobile ? 800 : 50;
-
   if (window.location.protocol.startsWith('http')) {
     alert("Internet Test Mode: Selection list saved and sent out by email successfully!");
-    // Wait slightly for the SMS app redirection handoff before completing the email form submit
-    setTimeout(() => {
-      // Delay sending email
-      document.getElementById('realSubmitAllBtn').click();
-    }, waitTime);
+    // Delay sending email
+    document.getElementById('realSubmitAllBtn').click();
   } else {
     // If testing locally (file:///), skip the live submit so the browser doesn't crash
     alert("💻 Local Test Mode: Selection list saved, copied successfully!");
