@@ -8,7 +8,6 @@
 // 1. KEEP YOUR ORIGINAL SETUPS
 const pCloudFolderBaseUrl = "https://filedn.com/lTh0v2Bogc301OgoFen42cL/ToDelete/"; 
 const selectedPhotos = new Set(); // Keeps track of selections across pages
-const deletedPhotos = new Set(); // Tracks items explicitly deleted/removed
 const WebMAIL_access_key = "3dda0e4c-6471-46d2-81b4-37a9fc909736";        // 1. UPDATE YOUR ADMIN EMAIL HERE
 
 // 2. TURN YOUR TEXT LIST INTO THE WORKING ARRAY
@@ -104,10 +103,11 @@ function displayPhotos() {
 // 4. Function called when Next or Prev buttons are clicked
 function changePage(direction) {
   currentPage += direction;
+  updatePageVisuals();
   displayPhotos(); // Re-render the grid with the new 100 photos
   window.scrollTo(0, 0); // Optional: Scroll back to top of the page
 
-  updatePageVisuals();
+  // updatePageVisuals();
 }
 
 // Initial load on page opening// Replace your old "displayPhotos();" line at the bottom with this:
@@ -117,148 +117,18 @@ window.onload = function() {
 };
 
 // -----------------
-// I want to send all selected as "Deleted"
-
-function prepareAndMarkDeleted() {
-  // new
-
-  // new
-  const selectedElements = document.querySelectorAll('.selected');
-  
-  if (selectedElements.length === 0) {
-    alert("Please select at least one photo before submitting.");
-    return;
-  }
-
-  let photoListArray = [];
-  let deletedPhotosList = JSON.parse(localStorage.getItem('deletedPhotos')) || [];
-
-  selectedElements.forEach((element) => {
-    let nameFound = "";
-
-    if (element.tagName === 'IMG' && element.src) {
-      nameFound = element.src.split('/').pop();
-    } 
-    else if (element.querySelector('img')) {
-      const innerImg = element.querySelector('img');
-      nameFound = innerImg.src.split('/').pop();
-    } 
-    else if (element.innerText) {
-      nameFound = element.innerText.trim();
-    }
-
-    if (nameFound) {
-      const cleanName = decodeURIComponent(nameFound);
-      photoListArray.push(cleanName); 
-      
-      if (!deletedPhotosList.includes(cleanName.toLowerCase())) {
-        deletedPhotosList.push(cleanName.toLowerCase());
-      }
-    }
-  });
-
-  const photoListText = photoListArray.join('\n'); 
-
-  // 📋 1. COPY TO CLIPBOARD CODE (Runs on both Mobile and Computer)
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(photoListText)
-      .then(() => console.log("List copied to clipboard!"))
-      .catch(err => console.error("Could not copy text: ", err));
-  }
-
-  // 📱 SMART MOBILE DETECTION
-  // Checks if the user is on an iPhone, iPad, Android phone, or mobile browser
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
-  if (isMobile) {
-    // Mobile Flow: Alert shows clipboard confirmation, then opens text message
-    alert("You have selected the following photos:\n\n" + photoListText + "\n\nList copied to clipboard! Opening text message...");
-
-    // Replace +1234567890 with your actual phone number (include country code)
-    const myPhoneNumber = "+19496482361"; 
-    const smsBody = encodeURIComponent("Here are my selected photos:\n" + photoListText);
-    
-    // Open native messaging app
-    window.location.href = `sms:${myPhoneNumber}?&body=${smsBody}`;
-  } else {
-    // Computer Flow: Alert confirms clipboard copy, completely skipping the phone app prompt!
-    alert("You have selected the following photos:\n\n" + photoListText + "\n\n📋 List copied to your clipboard! You can now paste (Ctrl+V) it anywhere.");
-  }
-
-  // Package names for Web3Forms email delivery
-  document.getElementById('hiddenPhotoList').value = photoListText; 
-  
-  // Commit to browser local storage memory immediately
-  localStorage.setItem('deletedPhotos', JSON.stringify(deletedPhotosList));
-
-  // Force visual grayscale dimming on screen instantly
-  selectedElements.forEach((element) => {
-    element.classList.remove('selected');
-    
-    element.style.setProperty('opacity', '0.2', 'important');
-    element.style.setProperty('filter', 'grayscale(100%)', 'important');
-    element.style.setProperty('pointer-events', 'none', 'important');
-
-    const internalImg = element.tagName === 'IMG' ? element : element.querySelector('img');
-    if (internalImg) {
-      internalImg.style.setProperty('opacity', '0.2', 'important');
-      internalImg.style.setProperty('filter', 'grayscale(100%)', 'important');
-    }
-  });
-
-
-  // 🛠️ SMART ENVIRONMENT CHECK:
-  // 1. Calculate how long to wait based on the device
-  const waitTime = isMobile ? 800 : 50;
-
-  if (window.location.protocol.startsWith('http')) {
-    alert("Internet Test Mode: Selection list saved and images grayed out successfully!");
-    // Wait slightly for the SMS app redirection handoff before completing the email form submit
-    setTimeout(() => {
-      // Delay sending email
-      document.getElementById('realSubmitBtn').click();
-    }, waitTime);
-  } else {
-    // If testing locally (file:///), skip the live submit so the browser doesn't crash
-    alert("💻 Local Test Mode: Selection list saved, copied, and images grayed out successfully!");
-  }
-}
-
 
 
 function resetPageMemory() {
   if (confirm("Are you sure you want to restore all photos and clear your selection history?")) {
-    // submitSelectedPhotos();
     localStorage.removeItem('selectedPhotos');
+    selectedPhotos.clear();
     window.location.reload();
   }
 }
 
 
-function submitSelectedPhotos() {
-    // 1. Convert the Set into a clean array of strings
-    const allSelectedFiles = Array.from(selectedPhotos);
-
-    // 2. Safety check: Check if they selected anything at all
-    if (allSelectedFiles.length === 0) {
-        alert("Please select at least one photo before submitting.");
-        return;
-    }
-
-    // 3. Process the entire list (Example: Log it or pass it to your backend)
-    console.log("Submitting all selected files across all pages:", allSelectedFiles);
-
-    // ---- YOUR ACTUAL SUBMISSION LOGIC HERE ----
-    // If you are formatting the text to copy/paste, you can do this:
-    const outputText = allSelectedFiles.join('\n');
-    
-    // text out
-    alert("NEW: Selected photos:\n\n" + outputText + "\n\nList copied to clipboard! Opening text message...");
-    // Example: If you have a text area to show the final list:
-    // document.getElementById('outputTextArea').value = outputText;
-}
-
-
+// OK: submitAllSelectedPhotos()
 function submitAllSelectedPhotos() {
 
   // 1. Convert the Set into a clean array of strings
@@ -324,10 +194,13 @@ function submitAllSelectedPhotos() {
     alert("💻 Local Test Mode: Selection list saved, copied successfully!");
   }
 
+  
   // Reset Memory
   localStorage.removeItem('selectedPhotos');
+  selectedPhotos.clear();
   window.location.reload();
 }
+
 
 // Run this immediately after the new page cards are added to the DOM
 function updatePageVisuals() {
@@ -342,13 +215,6 @@ function updatePageVisuals() {
             card.classList.add('selected');
         } else {
             card.classList.remove('selected');
-        }
-
-        // 2. Check deletion state
-        if (deletedPhotos.has(fileName)) {
-            card.classList.add('deleted');
-        } else {
-            card.classList.remove('deleted');
         }
     });
 }
